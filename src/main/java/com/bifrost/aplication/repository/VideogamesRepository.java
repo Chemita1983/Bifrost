@@ -12,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface VideogamesRepository extends JpaRepository<Videogames,Integer> {
 
-    @Query(nativeQuery = true, value ="select * from videogames")
+    @Query(nativeQuery = true, value ="select * from videogame")
     List<Videogames> getVideogames();
 
-    @Query(nativeQuery = true, value = "select * from videogames where game_name = :name")
+    @Query(nativeQuery = true, value = "select * from videogame where videogame_name = :name")
     Optional<Videogames> findVideogameByName(@Param("name") String nameVideogame);
 }

@@ -17,7 +17,10 @@ public class VideogameServiceImpl implements VideogameService {
 
     @Override
     public List<Videogames> getAllVideogames() {
-        return videogamesRepository.getVideogames();
+
+        List<Videogames> videogames = videogamesRepository.getVideogames();
+
+        return videogames;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.bifrost.aplication.domain;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,28 +11,27 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "videogames")
+@Table(name = "videogame")
 
 public class Videogames {
 
     @Id
-    @Column(name="cod_videogame")
+    @Column(name="id_videogame")
     @GeneratedValue
-    private int cod_videogame;
+    private int id_videogame;
 
-    private String game_name;
+    private String videogame_name;
 
-    private String digital;
+    private String videogame_type;
 
-    private String game_company;
+    private int videogame_year;
 
-    private String game_plataform;
+    private String platform_name;
 
-    private String game_type;
+    private String company_name;
 
-    private String game_year;
+    private int is_completed;
 
-    private boolean is_completed;
+    private int is_platinum;
 
-    private boolean platinum;
 }
