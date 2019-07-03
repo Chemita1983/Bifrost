@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Chema Videogames</title>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th> Nombre Videojuego </th>
+        <th> Tipo </th>
+        <th> Año </th>
+        <th> Plataforma</th>
+        <th> Compañia </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${outvideogames.empty}">
+        <td colspan="2"> No existen videojuegos </td>
+    </tr>
+
+    <tr th:each="outvideogame : ${outvideogames}">
+        <td><span th:text="${outvideogame.nombre}"> Nombre Videojuego </span></td>
+        <td><span th:text="${outvideogame.tipo}"> Tipo Videojuego </span></td>
+        <td><span th:text="${outvideogame.anio}"> Tipo Videojuego </span></td>
+        <td><span th:text="${outvideogame.plataforma}"> Tipo Videojuego </span></td>
+        <td><span th:text="${outvideogame.compania}"> Tipo Videojuego </span></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
