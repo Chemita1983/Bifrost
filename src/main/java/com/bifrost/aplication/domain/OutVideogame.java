@@ -98,3 +98,4 @@ public class OutVideogame {
         this.platineado = platineado;
     }
 }
+
