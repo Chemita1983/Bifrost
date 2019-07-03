@@ -1,7 +1,7 @@
 package com.bifrost.aplication.controller;
 
-import com.bifrost.aplication.domain.Videogames;
-import com.bifrost.aplication.service.VideogameService;
+import com.bifrost.aplication.domain.OutVideogame;
+import com.bifrost.aplication.service.impl.VideogameServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,21 +9,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class VideogamesController {
 
     @Autowired
-    private VideogameService videogameService;
+    private VideogameServiceImpl videogameService = null;
 
-    @GetMapping(value="/get" ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Videogames> getVideogames() {
-        return videogameService.getAllVideogames();
+    @GetMapping(value="/getVideogames" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getVideogames() {
+        return videogameService.getAllVideogames().toCompletableFuture().join();
     }
 
-    @GetMapping(value="/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<Videogames> getVideogames(@PathVariable("name") String gameName) {
-        return videogameService.getVideogameByName(gameName);
+    @GetMapping(value="/getVideogame/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getVideogame(@PathVariable("name") String gameName) {
+        return videogameService.getVideogameByName(gameName).toCompletableFuture().join();
     }
 }
