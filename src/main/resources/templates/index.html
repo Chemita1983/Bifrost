@@ -23,12 +23,12 @@
         <td colspan="2"> No existen videojuegos </td>
     </tr>
 
-    <tr th:each="outvideogame : ${outvideogames}">
-        <td><span th:text="${outvideogame.nombre}"> Nombre Videojuego </span></td>
-        <td><span th:text="${outvideogame.tipo}"> Tipo Videojuego </span></td>
-        <td><span th:text="${outvideogame.anio}"> Tipo Videojuego </span></td>
-        <td><span th:text="${outvideogame.plataforma}"> Tipo Videojuego </span></td>
-        <td><span th:text="${outvideogame.compania}"> Tipo Videojuego </span></td>
+    <tr align="center" th:each="outvideogame : ${outvideogames}">
+        <td align="center"><span th:text="${outvideogame.nombre}"> Nombre Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.tipo}"> Tipo Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.anio}"> Año Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.plataforma}"> Plataforma </span></td>
+        <td align="center"><span th:text="${outvideogame.compania}"> Compañia </span></td>
     </tr>
     </tbody>
 </table>
