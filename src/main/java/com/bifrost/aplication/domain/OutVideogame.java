@@ -13,6 +13,7 @@ public class OutVideogame {
         this.anio = videogame.getVideogame_year();
         this.compania = videogame.getCompany_name();
         this.plataforma = videogame.getPlatform_name();
+        this.digital = videogame.getIs_digital() != 0 ? SI : NO;
         this.completado = videogame.getIs_completed() != 0 ? SI : NO;
         this.platineado = videogame.getIs_platinum()  != 0 ? SI: NO;
     }
@@ -31,6 +32,9 @@ public class OutVideogame {
 
     @JsonProperty("Compañia")
     private String compania;
+
+    @JsonProperty("Digital")
+    private String digital;
 
     @JsonProperty("Te lo has pasado")
     private String completado;
