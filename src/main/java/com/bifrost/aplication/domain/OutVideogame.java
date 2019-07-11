@@ -1,13 +1,14 @@
 package com.bifrost.aplication.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OutVideogame {
 
-    public static final String SI = "Si";
-    public static final String NO = "No";
+    private static final String SI = "Si";
+    private static final String NO = "No";
 
-    public OutVideogame(Videogame videogame) {
+    public OutVideogame(VideogameConsole videogame) {
         this.nombre = videogame.getVideogame_name();
         this.tipo = videogame.getVideogame_type();
         this.anio = videogame.getVideogame_year();
@@ -16,6 +17,20 @@ public class OutVideogame {
         this.digital = videogame.getIs_digital() != 0 ? SI : NO;
         this.completado = videogame.getIs_completed() != 0 ? SI : NO;
         this.platineado = videogame.getIs_platinum()  != 0 ? SI: NO;
+        this.pretendido = videogame.getPretended() != 0 ? SI: null;
+        this.psplus = videogame.getPsplus() != 0 ? SI: NO;
+        this.gamesWithGold = videogame.getGameswithgold() != 0 ? SI: NO;
+    }
+
+    public OutVideogame(VideogamePc videogame_pc) {
+        this.nombre = videogame_pc.getVideogame_pc_name();
+        this.tipo = videogame_pc.getVideogame_pc_type();
+        this.anio = videogame_pc.getVideogame_pc_year();
+        this.compania = videogame_pc.getCompany_name();
+        this.plataforma = videogame_pc.getPlatform_name();
+        this.digital = videogame_pc.getIs_digital() != 0 ? SI : NO;
+        this.completado = videogame_pc.getIs_completed() != 0 ? SI : NO;
+        this.pretendido = videogame_pc.getPretended() != 0 ? SI: null;
     }
 
     @JsonProperty("Nombre del Videojuego")
@@ -25,7 +40,7 @@ public class OutVideogame {
     private String tipo;
 
     @JsonProperty("Año del Videojuego")
-    private int anio;
+    private Integer anio;
 
     @JsonProperty("Plataforma")
     private String plataforma;
@@ -40,62 +55,23 @@ public class OutVideogame {
     private String completado;
 
     @JsonProperty("Platineado")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String platineado;
 
-    public String getNombre() {
-        return nombre;
-    }
+    @JsonProperty("Pretendido")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String pretendido;
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    @JsonProperty("Es de PSPlus")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String psplus;
 
-    public String getTipo() {
-        return tipo;
-    }
+    @JsonProperty("Es de Games With Gold")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String gamesWithGold;
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 
-    public int getAnio() {
-        return anio;
-    }
 
-    public void setAnio(int anio) {
-        this.anio = anio;
-    }
 
-    public String getPlataforma() {
-        return plataforma;
-    }
-
-    public void setPlataforma(String plataforma) {
-        this.plataforma = plataforma;
-    }
-
-    public String getCompania() {
-        return compania;
-    }
-
-    public void setCompania(String compania) {
-        this.compania = compania;
-    }
-
-    public String getCompletado() {
-        return completado;
-    }
-
-    public void setCompletado(String completado) {
-        this.completado = completado;
-    }
-
-    public String getPlatineado() {
-        return platineado;
-    }
-
-    public void setPlatineado(String platineado) {
-        this.platineado = platineado;
-    }
 }
 

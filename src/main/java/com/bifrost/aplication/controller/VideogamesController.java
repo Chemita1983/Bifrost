@@ -15,23 +15,31 @@ import java.util.List;
 public class VideogamesController {
 
     @Autowired
-    private VideogameServiceImpl videogameService = null;
+    private VideogameServiceImpl videogameService;
 
-
- /* Change @Controller
-    @GetMapping(value="/getVideogamesWeb" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    /*   @GetMapping(value="/getConsoleVideogamesWeb" ,produces = MediaType.APPLICATION_JSON_VALUE)
     public String getVideogamesWeb(Model model) {
-        model.addAttribute("outvideogames",videogameService.getAllVideogames().toCompletableFuture().join());
+        model.addAttribute("outvideogames", videogameService.getConsoleVideogames().toCompletableFuture().join());
         return "index";
     }*/
 
-    @GetMapping(value="/getVideogame/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<OutVideogame> getVideogame(@PathVariable("name") String gameName) {
-        return videogameService.getVideogameByName(gameName).toCompletableFuture().join();
+    @GetMapping(value="/getConsoleVideogame/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getConsoleVideogameByName(@PathVariable("name") String gameName) {
+        return videogameService.getConsoleVideogameByName(gameName).toCompletableFuture().join();
     }
 
-    @GetMapping(value="/getVideogames" ,produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<OutVideogame> getVideogames(Model model) {
-        return videogameService.getAllVideogames().toCompletableFuture().join();
+    @GetMapping(value="/getConsoleVideogames" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getConsoleVideogames() {
+        return videogameService.getConsoleVideogames().toCompletableFuture().join();
+    }
+
+    @GetMapping(value="/getPcVideogame/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getPcVideogame(@PathVariable("name") String gameName) {
+        return videogameService.getPcVideogameByName(gameName).toCompletableFuture().join();
+    }
+
+    @GetMapping(value="/getPcVideogames" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OutVideogame> getPcVideogames() {
+        return videogameService.getPcVideogames().toCompletableFuture().join();
     }
 }
