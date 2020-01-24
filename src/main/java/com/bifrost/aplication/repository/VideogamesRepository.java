@@ -1,6 +1,6 @@
 package com.bifrost.aplication.repository;
 
-import com.bifrost.aplication.domain.VideogameConsole;
+import com.bifrost.aplication.entity.VideogameConsole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

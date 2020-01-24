@@ -1,6 +1,9 @@
-package com.bifrost.aplication.domain;
+package com.bifrost.aplication.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "platform")
