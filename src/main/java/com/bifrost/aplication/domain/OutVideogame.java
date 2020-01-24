@@ -1,5 +1,6 @@
 package com.bifrost.aplication.domain;
 
+import com.bifrost.aplication.entity.Videogame;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,7 +9,7 @@ public class OutVideogame {
     private static final String SI = "Si";
     private static final String NO = "No";
 
-    public OutVideogame(VideogameConsole videogame) {
+    public OutVideogame(Videogame videogame) {
         this.nombre = videogame.getVideogame_name();
         this.tipo = videogame.getVideogame_type();
         this.anio = videogame.getVideogame_year();
@@ -20,17 +21,6 @@ public class OutVideogame {
         this.pretendido = videogame.getPretended() != 0 ? SI: null;
         this.psplus = videogame.getPsplus() != 0 ? SI: NO;
         this.gamesWithGold = videogame.getGameswithgold() != 0 ? SI: NO;
-    }
-
-    public OutVideogame(VideogamePc videogame_pc) {
-        this.nombre = videogame_pc.getVideogame_pc_name();
-        this.tipo = videogame_pc.getVideogame_pc_type();
-        this.anio = videogame_pc.getVideogame_pc_year();
-        this.compania = videogame_pc.getCompany_name();
-        this.plataforma = videogame_pc.getPlatform_name();
-        this.digital = videogame_pc.getIs_digital() != 0 ? SI : NO;
-        this.completado = videogame_pc.getIs_completed() != 0 ? SI : NO;
-        this.pretendido = videogame_pc.getPretended() != 0 ? SI: null;
     }
 
     @JsonProperty("Nombre del Videojuego")

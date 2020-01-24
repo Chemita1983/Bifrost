@@ -12,10 +12,38 @@ public class Platform {
 
     @Id
     @Column(name="platform_name")
-    private String platform_name;
+    private String platformName;
 
-    private String platform_company;
+    @Column(name="platform_company")
+    private String platformCompany;
 
-    private int platform_year;
+    @Column(name="platform_year")
+    private int platformYear;
+
+    public String getPlatformName() {
+        return platformName;
+    }
+
+    public void setPlatformName(String platformName) {
+        this.platformName = platformName;
+    }
+
+    public String getPlatformCompany() {
+        return platformCompany;
+    }
+
+    public void setPlatformCompany(String platformCompany) {
+        this.platformCompany = platformCompany;
+    }
+
+    public int getPlatformYear() {
+        return platformYear;
+    }
+
+    public void setPlatformYear(int platformYear) {
+        this.platformYear = platformYear;
+    }
+
+
 
 }

@@ -7,9 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "videogames_console")
+@Table(name = "videogames")
 
-public class VideogameConsole {
+public class Videogame {
     @Id
     @Column(name = "id_videogame")
     @GeneratedValue

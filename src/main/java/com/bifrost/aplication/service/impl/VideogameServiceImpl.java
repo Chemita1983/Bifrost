@@ -2,8 +2,7 @@ package com.bifrost.aplication.service.impl;
 
 import com.bifrost.aplication.domain.OutVideogame;
 import com.bifrost.aplication.mappers.VideogameBuilder;
-import com.bifrost.aplication.repository.VideogamesConsoleRepository;
-import com.bifrost.aplication.repository.VideogamesPcRepository;
+import com.bifrost.aplication.repository.VideogamesRepository;
 import com.bifrost.aplication.service.VideogameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,33 +18,23 @@ public class VideogameServiceImpl implements VideogameService {
     private VideogameBuilder videogameBuilder;
 
     @Autowired
-    private VideogamesConsoleRepository videogamesConsoleRepository;
-
-    @Autowired
-    private VideogamesPcRepository videogamesPcRepository;
+    private VideogamesRepository videogamesRepository;
 
     @Override
-    public CompletionStage<List<OutVideogame>> getConsoleVideogames() {
-        return CompletableFuture.supplyAsync(() -> videogamesConsoleRepository.getConsoleVideogames())
+    public CompletionStage<List<OutVideogame>> getVideogames() {
+        return CompletableFuture.supplyAsync(() -> videogamesRepository.getVideogames())
                 .thenApplyAsync(v -> videogameBuilder.convertListConsoleVideogame(v));
     }
 
     @Override
-    public CompletionStage<List<OutVideogame>> getConsoleVideogameByName(String gameName) {
-        return CompletableFuture.supplyAsync(() -> videogamesConsoleRepository.getConsoleVideogameByName(gameName))
+    public CompletionStage<List<OutVideogame>> getVideogameByName(String gameName) {
+        return CompletableFuture.supplyAsync(() -> videogamesRepository.getVideogameByName(gameName))
                 .thenApplyAsync(v -> videogameBuilder.convertListConsoleVideogame(v));
     }
 
     @Override
-    public CompletionStage<List<OutVideogame>> getPcVideogames() {
-        return CompletableFuture.supplyAsync(() -> videogamesPcRepository.getPcVideogames())
-                .thenApplyAsync(v -> videogameBuilder.convertListPcVideogames(v));
-    }
-
-    @Override
-    public CompletionStage<List<OutVideogame>> getPcVideogameByName(String gameName) {
-        return CompletableFuture.supplyAsync(() -> videogamesPcRepository.getPcVideogameByName(gameName))
-                .thenApplyAsync(v -> videogameBuilder.convertListPcVideogames(v));
+    public CompletionStage<Integer> addVideogame(String videogame) {
+        return null;
     }
 
 }
