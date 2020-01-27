@@ -4,45 +4,61 @@ import com.bifrost.aplication.entity.Videogame;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Optional;
+
 public class OutVideogame {
 
     private static final String SI = "Si";
     private static final String NO = "No";
 
     public OutVideogame(Videogame videogame) {
-        this.nombre = videogame.getVideogameName();
-        this.tipo = videogame.getVideogameType();
-        this.anio = videogame.getVideogameYear();
-        this.compania = videogame.getCompanyName();
-        this.plataforma = videogame.getPlatformName();
+        this.videogameName = videogame.getVideogameName();
+        this.videogameType = videogame.getVideogameType();
+        this.videogameYear = videogame.getVideogameYear();
+        this.videogameCompany = videogame.getCompanyName();
+        this.videogamePlatform = videogame.getPlatformName();
+        this.digitalPlatform = videogame.getDigitalPlatformName();
         this.digital = videogame.getIsDigital() != 0 ? SI : NO;
-        this.completado = videogame.getIsCompleted() != 0 ? SI : NO;
-        this.platineado = videogame.getIsPlatinum()  != 0 ? SI: NO;
+        this.completed = videogame.getIsCompleted() != 0 ? SI : NO;
+        this.platinum = verifyPlatinum(videogame.getPlatformName(), videogame.getIsPlatinum());
     }
 
     @JsonProperty("Nombre del Videojuego")
-    private String nombre;
+    private String videogameName;
 
     @JsonProperty("Tipo de Videojuego")
-    private String tipo;
+    private String videogameType;
 
     @JsonProperty("Año del Videojuego")
-    private Integer anio;
+    private Integer videogameYear;
 
     @JsonProperty("Plataforma")
-    private String plataforma;
+    private String videogamePlatform;
 
     @JsonProperty("Compañia")
-    private String compania;
+    private String videogameCompany;
 
     @JsonProperty("Digital")
     private String digital;
 
+    @JsonProperty("Plataforma Digital")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String digitalPlatform;
+
     @JsonProperty("Te lo has pasado")
-    private String completado;
+    private String completed;
 
     @JsonProperty("Platineado")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String platineado;
+    private String platinum;
+
+
+    private String verifyPlatinum(String platformName, Integer isPlatinum) {
+
+        return Optional.ofNullable(platformName)
+                .filter(platformNameResult -> platformNameResult.equals("PlayStation 4"))
+                .map(result -> isPlatinum != 0 ? SI : NO)
+                .orElse(null);
+    }
 }
 

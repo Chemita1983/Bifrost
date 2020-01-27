@@ -1,5 +1,7 @@
 package com.bifrost.aplication.entity;
 
+import lombok.Data;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,7 +10,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "platform")
 
-public class Platform {
+public @Data class Platform {
 
     @Id
     @Column(name="platform_name")
@@ -19,31 +21,5 @@ public class Platform {
 
     @Column(name="platform_year")
     private int platformYear;
-
-    public String getPlatformName() {
-        return platformName;
-    }
-
-    public void setPlatformName(String platformName) {
-        this.platformName = platformName;
-    }
-
-    public String getPlatformCompany() {
-        return platformCompany;
-    }
-
-    public void setPlatformCompany(String platformCompany) {
-        this.platformCompany = platformCompany;
-    }
-
-    public int getPlatformYear() {
-        return platformYear;
-    }
-
-    public void setPlatformYear(int platformYear) {
-        this.platformYear = platformYear;
-    }
-
-
 
 }

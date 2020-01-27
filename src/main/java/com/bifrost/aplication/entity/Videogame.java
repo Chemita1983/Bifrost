@@ -5,17 +5,19 @@ import lombok.Data;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "videogames")
 
 
-public @Data class Videogame {
+public @Data class Videogame implements Serializable {
     @Id
     @Column(name = "id_videogame")
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer idVideogame;
 
     private String videogameName;
@@ -25,6 +27,8 @@ public @Data class Videogame {
     private Integer videogameYear;
 
     private String platformName;
+
+    private String digitalPlatformName;
 
     private String companyName;
 

@@ -1,6 +1,7 @@
 package com.bifrost.aplication.service;
 
 import com.bifrost.aplication.domain.OutVideogame;
+import com.bifrost.aplication.entity.Videogame;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,6 @@ public interface VideogameService {
 
     CompletionStage<List<OutVideogame>> getVideogameByName(String gameName);
 
-    CompletionStage<Integer> addVideogame(String videogame);
+    CompletionStage<String> addVideogame(Videogame videogame);
 
 }

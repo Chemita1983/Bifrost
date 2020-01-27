@@ -1,6 +1,7 @@
 package com.bifrost.aplication.service.impl;
 
 import com.bifrost.aplication.domain.OutVideogame;
+import com.bifrost.aplication.entity.Videogame;
 import com.bifrost.aplication.mappers.VideogameBuilder;
 import com.bifrost.aplication.repository.VideogamesRepository;
 import com.bifrost.aplication.service.VideogameService;
@@ -33,8 +34,10 @@ public class VideogameServiceImpl implements VideogameService {
     }
 
     @Override
-    public CompletionStage<Integer> addVideogame(String videogame) {
-        return null;
+    public CompletionStage<String> addVideogame(Videogame videogame) {
+        return CompletableFuture.supplyAsync(() -> videogamesRepository.save(videogame))
+                .thenApplyAsync(result -> "OK " + result.getIdVideogame()+ " " + result.getVideogameName())
+                .exceptionally(e -> "KO " + e.getMessage());
     }
 
 }

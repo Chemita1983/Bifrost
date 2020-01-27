@@ -6,17 +6,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class OutPlatform {
 
     public OutPlatform(Platform plataform){
-        this.nombrePlataforma = plataform.getPlatformName();
-        this.anioPlataforma = plataform.getPlatformYear();
-        this.companiaPlataforma = plataform.getPlatformCompany();
+        this.platformName = plataform.getPlatformName();
+        this.platformCompany = plataform.getPlatformCompany();
+        this.platformYear = plataform.getPlatformYear();
     }
 
     @JsonProperty("Nombre de la plataforma")
-    private String nombrePlataforma;
+    private String platformName;
 
     @JsonProperty("Empresa de la plataforma")
-    private String companiaPlataforma;
+    private String platformCompany;
 
     @JsonProperty("Año de la plataforma")
-    private Integer anioPlataforma;
+    private Integer platformYear;
 }
