@@ -10,17 +10,14 @@ public class OutVideogame {
     private static final String NO = "No";
 
     public OutVideogame(Videogame videogame) {
-        this.nombre = videogame.getVideogame_name();
-        this.tipo = videogame.getVideogame_type();
-        this.anio = videogame.getVideogame_year();
-        this.compania = videogame.getCompany_name();
-        this.plataforma = videogame.getPlatform_name();
-        this.digital = videogame.getIs_digital() != 0 ? SI : NO;
-        this.completado = videogame.getIs_completed() != 0 ? SI : NO;
-        this.platineado = videogame.getIs_platinum()  != 0 ? SI: NO;
-        this.pretendido = videogame.getPretended() != 0 ? SI: null;
-        this.psplus = videogame.getPsplus() != 0 ? SI: NO;
-        this.gamesWithGold = videogame.getGameswithgold() != 0 ? SI: NO;
+        this.nombre = videogame.getVideogameName();
+        this.tipo = videogame.getVideogameType();
+        this.anio = videogame.getVideogameYear();
+        this.compania = videogame.getCompanyName();
+        this.plataforma = videogame.getPlatformName();
+        this.digital = videogame.getIsDigital() != 0 ? SI : NO;
+        this.completado = videogame.getIsCompleted() != 0 ? SI : NO;
+        this.platineado = videogame.getIsPlatinum()  != 0 ? SI: NO;
     }
 
     @JsonProperty("Nombre del Videojuego")
@@ -47,21 +44,5 @@ public class OutVideogame {
     @JsonProperty("Platineado")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String platineado;
-
-    @JsonProperty("Pretendido")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String pretendido;
-
-    @JsonProperty("Es de PSPlus")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String psplus;
-
-    @JsonProperty("Es de Games With Gold")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String gamesWithGold;
-
-
-
-
 }
 
