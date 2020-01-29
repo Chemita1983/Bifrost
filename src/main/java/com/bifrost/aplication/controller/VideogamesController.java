@@ -32,27 +32,27 @@ public class VideogamesController {
         return "index";
     }*/
 
-    @GetMapping(value="/getVideogame/{name}" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getVideogame/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletionStage<List<OutVideogame>> getConsoleVideogameByName(@PathVariable("name") String gameName) {
         return videogameService.getVideogameByName(gameName);
     }
 
-    @GetMapping(value="/getVideogames" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getVideogames", produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletionStage<List<OutVideogame>> getConsoleVideogames() {
         return videogameService.getVideogames();
     }
 
-    @PostMapping(value="/addVideogame" ,consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/addVideogame", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletionStage<String> addVideogame(@RequestBody Videogame videogame) {
         return videogameService.addVideogame(videogame);
     }
 
-    @GetMapping(value="/getPlatform" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getPlatform", produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletionStage<List<OutPlatform>> getPlatform() {
         return platformService.getPlatforms();
     }
 
-    @GetMapping(value="/getDigitalPlatform" ,produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getDigitalPlatform", produces = MediaType.APPLICATION_JSON_VALUE)
     public CompletionStage<List<OutDigitalPlatform>> getDigitalPlatform() {
         return platformService.getDigitalPlatforms();
     }
