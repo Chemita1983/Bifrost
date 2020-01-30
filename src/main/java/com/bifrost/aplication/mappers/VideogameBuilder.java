@@ -2,9 +2,9 @@ package com.bifrost.aplication.mappers;
 
 import com.bifrost.aplication.domain.OutVideogame;
 import com.bifrost.aplication.entity.Videogame;
+import com.bifrost.aplication.exceptions.NotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,10 +14,11 @@ public class VideogameBuilder {
 
     public List<OutVideogame> convertListConsoleVideogame(List<Videogame> videogames) {
         return Optional.of(videogames)
-                .map(v -> v.stream()
+                .filter(videogamesList -> !videogamesList.isEmpty())
+                .map(videogamesList -> videogamesList.stream()
                         .map(OutVideogame::new)
                         .collect(Collectors.toList()))
-                .orElse(new ArrayList<>());
+                .orElseThrow(NotFoundException::new);
 
     }
 }
