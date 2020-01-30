@@ -15,7 +15,6 @@
 *.iws
 *.iml
 *.ipr
-*.properties
 
 ### NetBeans ###
 /nbproject/private/
@@ -24,3 +23,6 @@
 /dist/
 /nbdist/
 /.nb-gradle/
+
+#Other
+application.properties
