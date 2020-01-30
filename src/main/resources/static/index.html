@@ -24,11 +24,11 @@
     </tr>
 
     <tr align="center" th:each="outvideogame : ${outvideogames}">
-        <td align="center"><span th:text="${outvideogame.nombre}"> Nombre Videojuego </span></td>
-        <td align="center"><span th:text="${outvideogame.tipo}"> Tipo Videojuego </span></td>
-        <td align="center"><span th:text="${outvideogame.anio}"> Año Videojuego </span></td>
-        <td align="center"><span th:text="${outvideogame.plataforma}"> Plataforma </span></td>
-        <td align="center"><span th:text="${outvideogame.compania}"> Compañia </span></td>
+        <td align="center"><span th:text="${outvideogame.videogameName}"> Nombre Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.videogameType}"> Tipo Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.videogameYear}"> Año Videojuego </span></td>
+        <td align="center"><span th:text="${outvideogame.videogamePlatform}"> Plataforma </span></td>
+        <td align="center"><span th:text="${outvideogame.videogameCompany}"> Compañia </span></td>
     </tr>
     </tbody>
 </table>

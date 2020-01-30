@@ -26,19 +26,21 @@ public class VideogamesController {
     @Autowired
     private PlatformServiceImpl platformService;
 
-    /*   @GetMapping(value="/getVideogamesWeb" ,produces = MediaType.APPLICATION_JSON_VALUE)
+  /*  @GetMapping(value="/getVideogamesWeb" ,produces = MediaType.APPLICATION_JSON_VALUE)
     public String getVideogamesWeb(Model model) {
-        model.addAttribute("outvideogames", videogameService.getVideogames().toCompletableFuture().join());
+        model.addAttribute("outvideogames", getVideogames());
         return "index";
-    }*/
+    }
+
+  */
 
     @GetMapping(value = "/getVideogame/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutVideogame>> getConsoleVideogameByName(@PathVariable("name") String gameName) {
+    public CompletionStage<List<OutVideogame>> getVideogameByName(@PathVariable("name") String gameName) {
         return videogameService.getVideogameByName(gameName);
     }
 
     @GetMapping(value = "/getVideogames", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutVideogame>> getConsoleVideogames() {
+    public CompletionStage<List<OutVideogame>> getVideogames() {
         return videogameService.getVideogames();
     }
 
