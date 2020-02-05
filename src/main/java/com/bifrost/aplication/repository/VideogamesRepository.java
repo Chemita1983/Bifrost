@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface VideogamesRepository extends JpaRepository<Videogame,Integer> {
+public interface VideogamesRepository extends JpaRepository<Videogame, Integer> {
 
     @Query(nativeQuery = true, value ="select * from videogames")
     List<Videogame> getVideogames();
