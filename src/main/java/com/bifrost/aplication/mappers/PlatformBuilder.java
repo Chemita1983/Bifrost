@@ -1,10 +1,10 @@
 package com.bifrost.aplication.mappers;
 
 
-import com.bifrost.aplication.domain.OutDigitalPlatform;
-import com.bifrost.aplication.domain.OutPlatform;
-import com.bifrost.aplication.entity.DigitalPlatform;
-import com.bifrost.aplication.entity.Platform;
+import com.bifrost.aplication.api.OutDigitalPlatform;
+import com.bifrost.aplication.api.OutPlatform;
+import com.bifrost.aplication.domain.DigitalPlatform;
+import com.bifrost.aplication.domain.Platform;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

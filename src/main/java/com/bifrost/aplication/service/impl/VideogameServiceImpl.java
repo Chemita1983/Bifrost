@@ -1,7 +1,7 @@
 package com.bifrost.aplication.service.impl;
 
-import com.bifrost.aplication.domain.OutVideogame;
-import com.bifrost.aplication.entity.Videogame;
+import com.bifrost.aplication.api.OutVideogame;
+import com.bifrost.aplication.domain.Videogame;
 import com.bifrost.aplication.exceptions.BadRequestException;
 import com.bifrost.aplication.mappers.VideogameBuilder;
 import com.bifrost.aplication.repository.VideogamesRepository;

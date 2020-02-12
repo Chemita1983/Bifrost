@@ -1,6 +1,6 @@
-package com.bifrost.aplication.domain;
+package com.bifrost.aplication.api;
 
-import com.bifrost.aplication.entity.Videogame;
+import com.bifrost.aplication.domain.Videogame;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

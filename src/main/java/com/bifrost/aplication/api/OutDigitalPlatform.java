@@ -1,6 +1,6 @@
-package com.bifrost.aplication.domain;
+package com.bifrost.aplication.api;
 
-import com.bifrost.aplication.entity.DigitalPlatform;
+import com.bifrost.aplication.domain.DigitalPlatform;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OutDigitalPlatform {

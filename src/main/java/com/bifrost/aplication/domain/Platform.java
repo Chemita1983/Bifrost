@@ -1,4 +1,4 @@
-package com.bifrost.aplication.entity;
+package com.bifrost.aplication.domain;
 
 import lombok.Data;
 

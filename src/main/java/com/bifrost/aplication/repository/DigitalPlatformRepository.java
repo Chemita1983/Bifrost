@@ -1,6 +1,6 @@
 package com.bifrost.aplication.repository;
 
-import com.bifrost.aplication.entity.DigitalPlatform;
+import com.bifrost.aplication.domain.DigitalPlatform;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,7 +1,7 @@
 package com.bifrost.aplication.service;
 
-import com.bifrost.aplication.domain.OutVideogame;
-import com.bifrost.aplication.entity.Videogame;
+import com.bifrost.aplication.api.OutVideogame;
+import com.bifrost.aplication.domain.Videogame;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

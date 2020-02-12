@@ -1,9 +1,9 @@
 package com.bifrost.aplication.controller;
 
-import com.bifrost.aplication.domain.OutDigitalPlatform;
-import com.bifrost.aplication.domain.OutPlatform;
-import com.bifrost.aplication.domain.OutVideogame;
-import com.bifrost.aplication.entity.Videogame;
+import com.bifrost.aplication.api.OutDigitalPlatform;
+import com.bifrost.aplication.api.OutPlatform;
+import com.bifrost.aplication.api.OutVideogame;
+import com.bifrost.aplication.domain.Videogame;
 import com.bifrost.aplication.service.impl.PlatformServiceImpl;
 import com.bifrost.aplication.service.impl.VideogameServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

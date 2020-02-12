@@ -1,7 +1,7 @@
 package com.bifrost.aplication.service.impl;
 
-import com.bifrost.aplication.domain.OutDigitalPlatform;
-import com.bifrost.aplication.domain.OutPlatform;
+import com.bifrost.aplication.api.OutDigitalPlatform;
+import com.bifrost.aplication.api.OutPlatform;
 import com.bifrost.aplication.mappers.PlatformBuilder;
 import com.bifrost.aplication.repository.DigitalPlatformRepository;
 import com.bifrost.aplication.repository.PlatformRepository;
