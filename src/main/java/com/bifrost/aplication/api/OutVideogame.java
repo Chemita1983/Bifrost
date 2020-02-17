@@ -16,11 +16,11 @@ public class OutVideogame {
         this.videogameType = videogame.getVideogameType();
         this.videogameYear = videogame.getVideogameYear();
         this.videogameCompany = videogame.getCompanyName();
-        this.videogamePlatform = videogame.getPlatformName();
-        this.digitalPlatform = videogame.getDigitalPlatformName();
+        this.videogamePlatform = videogame.getPlatform().getPlatformName();
+        this.digitalPlatform = videogame.getDigitalPlatform().getDigitalPlatformName();
         this.digital = videogame.getIsDigital() != 0 ? SI : NO;
         this.completed = videogame.getIsCompleted() != 0 ? SI : NO;
-        this.platinum = verifyPlatinum(videogame.getPlatformName(), videogame.getIsPlatinum());
+        this.platinum = verifyPlatinum(videogame.getPlatform().getPlatformName(), videogame.getIsPlatinum());
     }
 
     @JsonProperty("Nombre del Videojuego")

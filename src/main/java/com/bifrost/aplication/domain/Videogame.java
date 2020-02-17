@@ -2,17 +2,19 @@ package com.bifrost.aplication.domain;
 
 import lombok.Data;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "videogames")
-
 
 public @Data class Videogame implements Serializable {
     @Id
@@ -26,9 +28,13 @@ public @Data class Videogame implements Serializable {
 
     private Integer videogameYear;
 
-    private String platformName;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="platform_videogame")
+    private Platform platform;
 
-    private String digitalPlatformName;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="digital_platform_videogame")
+    private DigitalPlatform digitalPlatform;
 
     private String companyName;
 
