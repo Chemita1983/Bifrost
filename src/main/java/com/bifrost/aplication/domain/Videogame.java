@@ -1,6 +1,9 @@
 package com.bifrost.aplication.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,12 +17,16 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "videogames")
 
 public @Data class Videogame implements Serializable {
+
     @Id
     @Column(name = "id_videogame")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer idVideogame;
 
     private String videogameName;
@@ -28,11 +35,11 @@ public @Data class Videogame implements Serializable {
 
     private Integer videogameYear;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="platform_videogame")
     private Platform platform;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="digital_platform_videogame")
     private DigitalPlatform digitalPlatform;
 

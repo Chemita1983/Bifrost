@@ -17,7 +17,8 @@ public class OutVideogame {
         this.videogameYear = videogame.getVideogameYear();
         this.videogameCompany = videogame.getCompanyName();
         this.videogamePlatform = videogame.getPlatform().getPlatformName();
-        this.digitalPlatform = videogame.getDigitalPlatform().getDigitalPlatformName();
+        this.digitalPlatform = Optional.ofNullable(videogame.getDigitalPlatform())
+                .map(digitalPlatform -> digitalPlatform.getDigitalPlatformName()).orElse(null);
         this.digital = videogame.getIsDigital() != 0 ? SI : NO;
         this.completed = videogame.getIsCompleted() != 0 ? SI : NO;
         this.platinum = verifyPlatinum(videogame.getPlatform().getPlatformName(), videogame.getIsPlatinum());
