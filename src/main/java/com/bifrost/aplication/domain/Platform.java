@@ -2,8 +2,9 @@ package com.bifrost.aplication.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,11 +16,13 @@ import java.io.Serializable;
 
 @Entity
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "platform")
 
-public @Data class Platform implements Serializable {
+public class Platform implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -2,8 +2,9 @@ package com.bifrost.aplication.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,11 +19,13 @@ import java.io.Serializable;
 
 @Entity
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "videogames")
 
-public @Data class Videogame implements Serializable {
+public class Videogame implements Serializable {
 
     @Id
     @Column(name = "id_videogame")
