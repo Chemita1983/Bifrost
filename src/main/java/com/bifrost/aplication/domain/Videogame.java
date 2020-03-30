@@ -54,4 +54,6 @@ public class Videogame implements Serializable {
 
     private Integer isPlatinum;
 
+    private Integer players;
+
 }

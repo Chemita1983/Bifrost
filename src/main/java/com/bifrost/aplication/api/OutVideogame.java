@@ -3,9 +3,13 @@ package com.bifrost.aplication.api;
 import com.bifrost.aplication.domain.Videogame;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Optional;
 
+@Getter
+@Setter
 public class OutVideogame {
 
     private static final String SI = "Si";
@@ -22,6 +26,7 @@ public class OutVideogame {
         this.digital = videogame.getIsDigital() != 0 ? SI : NO;
         this.completed = videogame.getIsCompleted() != 0 ? SI : NO;
         this.platinum = verifyPlatinum(videogame.getPlatform().getPlatformName(), videogame.getIsPlatinum());
+        this.players = videogame.getPlayers();
     }
 
     @JsonProperty("Nombre del Videojuego")
@@ -38,6 +43,9 @@ public class OutVideogame {
 
     @JsonProperty("Compañia")
     private String videogameCompany;
+
+    @JsonProperty("Jugadores")
+    private Integer players;
 
     @JsonProperty("Digital")
     private String digital;
