@@ -27,12 +27,14 @@ public class VideogameServiceImpl implements VideogameService {
 
     @Override
     public CompletionStage<List<OutVideogame>> getVideogames() {
+
         return CompletableFuture.supplyAsync(() -> videogamesRepository.getVideogames())
                 .thenApplyAsync(v -> videogameBuilder.convertListConsoleVideogame(v));
     }
 
     @Override
     public CompletionStage<List<OutVideogame>> getVideogameByName(String gameName) {
+
         return CompletableFuture.supplyAsync(() -> videogamesRepository.getVideogameByName(gameName))
                 .thenApplyAsync(v -> videogameBuilder.convertListConsoleVideogame(v));
     }
@@ -59,6 +61,7 @@ public class VideogameServiceImpl implements VideogameService {
                 .isCompleted(videogame.getIsCompleted())
                 .isDigital(videogame.getIsDigital())
                 .isPlatinum(videogame.getIsPlatinum())
+                .players(videogame.getPlayers())
                 .build();
     }
 

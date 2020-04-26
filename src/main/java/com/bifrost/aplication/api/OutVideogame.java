@@ -1,5 +1,6 @@
 package com.bifrost.aplication.api;
 
+import com.bifrost.aplication.domain.Platform;
 import com.bifrost.aplication.domain.Videogame;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +26,7 @@ public class OutVideogame {
                 .map(digitalPlatform -> digitalPlatform.getDigitalPlatformName()).orElse(null);
         this.digital = videogame.getIsDigital() != 0 ? SI : NO;
         this.completed = videogame.getIsCompleted() != 0 ? SI : NO;
-        this.platinum = verifyPlatinum(videogame.getPlatform().getPlatformName(), videogame.getIsPlatinum());
+        this.platinum = verifyPlatinum(videogame.getPlatform(), videogame.getIsPlatinum());
         this.players = videogame.getPlayers();
     }
 
@@ -62,10 +63,10 @@ public class OutVideogame {
     private String platinum;
 
 
-    private String verifyPlatinum(String platformName, Integer isPlatinum) {
+    private String verifyPlatinum(Platform platform, Integer isPlatinum) {
 
-        return Optional.ofNullable(platformName)
-                .filter(platformNameResult -> platformNameResult.equals("PlayStation 4"))
+        return Optional.ofNullable(platform)
+                .filter(platformNameResult -> platformNameResult.getPkPlatform().equals(4))
                 .map(result -> isPlatinum != 0 ? SI : NO)
                 .orElse(null);
     }
