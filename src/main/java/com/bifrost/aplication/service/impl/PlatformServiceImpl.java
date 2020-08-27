@@ -2,6 +2,8 @@ package com.bifrost.aplication.service.impl;
 
 import com.bifrost.aplication.api.OutDigitalPlatform;
 import com.bifrost.aplication.api.OutPlatform;
+import com.bifrost.aplication.domain.Platform;
+import com.bifrost.aplication.exceptions.BadRequestException;
 import com.bifrost.aplication.mappers.PlatformBuilder;
 import com.bifrost.aplication.repository.DigitalPlatformRepository;
 import com.bifrost.aplication.repository.PlatformRepository;
@@ -33,10 +35,30 @@ public class PlatformServiceImpl implements PlatformService {
     }
 
     @Override
+    public CompletionStage<String> addPlatform(Platform platform) {
+
+        return CompletableFuture.supplyAsync(() -> platformRepository.save(createPlatform(platform)))
+                .thenApplyAsync(result -> "OK " + result.getPkPlatform() + " " + result.getPlatformName())
+                .exceptionally(exception -> {
+                    throw new BadRequestException(exception.getMessage());
+                });
+    }
+
+    @Override
     public CompletionStage<List<OutDigitalPlatform>> getDigitalPlatforms() {
 
         return CompletableFuture.supplyAsync(() -> digitalPlatformRepository.getDigitalPlatforms())
                 .thenApplyAsync(digitalPlatforms -> platformBuilder.convertListDigitalPlatform(digitalPlatforms));
+    }
+
+    private Platform createPlatform(Platform platform){
+
+        return Platform.builder()
+                .pkPlatform(platform.getPkPlatform())
+                .platformName(platform.getPlatformName())
+                .platformCompany(platform.getPlatformCompany())
+                .platformYear(platform.getPlatformYear())
+                .build();
     }
 }
 
