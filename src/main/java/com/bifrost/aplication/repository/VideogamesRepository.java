@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface VideogamesRepository extends JpaRepository<Videogame, Integer> {
 
-    @Query(nativeQuery = true, value ="select * from videogames")
+    @Query(nativeQuery = true, value = "select * from videogames")
     List<Videogame> getVideogames();
 
     @Query(nativeQuery = true, value = "select * from videogames where videogame_name like %:name%")

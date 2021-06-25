@@ -1,6 +1,5 @@
 package com.bifrost.aplication.controller;
 
-import com.bifrost.aplication.api.OutVideogame;
 import com.bifrost.aplication.domain.Videogame;
 import com.bifrost.aplication.service.impl.VideogameServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 @RestController
 public class VideogamesController {
@@ -21,17 +19,17 @@ public class VideogamesController {
     private VideogameServiceImpl videogameService;
 
     @GetMapping(value = "/getVideogame/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutVideogame>> getVideogameByName(@PathVariable("name") String gameName) {
-        return videogameService.getVideogameByName(gameName);
+    public List<Videogame> getVideogameByName(@PathVariable("name") String name) {
+        return videogameService.readByName(name);
     }
 
     @GetMapping(value = "/getVideogames", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutVideogame>> getVideogames() {
-        return videogameService.getVideogames();
+    public List<Videogame> getVideogames() {
+        return videogameService.readAll();
     }
 
     @PostMapping(value = "/addVideogame", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<String> addVideogame(@RequestBody Videogame videogame) {
-        return videogameService.addVideogame(videogame);
+    public Videogame addVideogame(@RequestBody Videogame videogame) {
+        return videogameService.add(videogame);
     }
 }

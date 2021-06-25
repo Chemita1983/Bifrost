@@ -1,7 +1,5 @@
 package com.bifrost.aplication.controller;
 
-import com.bifrost.aplication.api.OutDigitalPlatform;
-import com.bifrost.aplication.api.OutPlatform;
 import com.bifrost.aplication.domain.Platform;
 import com.bifrost.aplication.service.impl.PlatformServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 @RestController
 public class PlatformController {
@@ -21,17 +18,13 @@ public class PlatformController {
     private PlatformServiceImpl platformService;
 
     @GetMapping(value = "/getAllPlatforms", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutPlatform>> getPlatform() {
-        return platformService.getPlatforms();
+    public List<Platform> getPlatformById() {
+        return platformService.readAll();
     }
 
-    @GetMapping(value = "/getAllDigitalPlatforms", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<List<OutDigitalPlatform>> getDigitalPlatform() {
-        return platformService.getDigitalPlatforms();
-    }
 
     @PostMapping(value = "/addPlatform", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompletionStage<String> addPlatform(@RequestBody Platform platform) {
-        return platformService.addPlatform(platform);
+    public Platform addPlatform(@RequestBody Platform platform) {
+        return platformService.add(platform);
     }
 }

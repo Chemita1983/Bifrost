@@ -22,7 +22,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Table(name = "platform")
 
-public class Platform implements Serializable {
+public class Platform extends BifrostEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
