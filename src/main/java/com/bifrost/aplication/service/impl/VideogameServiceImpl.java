@@ -28,5 +28,4 @@ public class VideogameServiceImpl implements BifrostService<Videogame> {
     public Videogame add(Videogame videogame) {
         return videogamesRepository.save(videogame);
     }
-
 }
