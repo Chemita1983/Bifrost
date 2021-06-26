@@ -1,5 +1,6 @@
 package com.bifrost.aplication.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class Videogame extends BifrostEntity implements Serializable {
     @Id
     @Column(name = "id_videogame")
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Integer idVideogame;
 
     private String videogameName;
