@@ -26,6 +26,6 @@ public class VideogameServiceImpl implements BifrostService<Videogame> {
 
     @Override
     public Videogame add(Videogame videogame) {
-        return videogamesRepository.save((videogame));
+        return videogamesRepository.save(videogame);
     }
 }

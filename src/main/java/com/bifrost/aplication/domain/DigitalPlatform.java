@@ -1,5 +1,6 @@
 package com.bifrost.aplication.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,11 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 @Entity
 @Getter
@@ -21,17 +18,13 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "digital_platform")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class DigitalPlatform extends BifrostEntity {
 
-public class DigitalPlatform extends BifrostEntity implements Serializable {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "pk_digital_platform")
-    private Integer pkDigitalPlatform;
-
-    @Column(name="digital_platform_name")
+    @Column(name = "digital_platform_name")
     private String digitalPlatformName;
 
-    @Column(name="digital_platform_company")
+    @Column(name = "digital_platform_company")
     private String digitalPlatformCompany;
+
 }
