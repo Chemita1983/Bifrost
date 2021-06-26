@@ -10,6 +10,6 @@ public class VideogameValidator extends BifrostValidator<ValidVideogame, Videoga
 
     @Override
     public boolean validBifrostEntity(Videogame videogame) {
-        return false;
+        return true;
     }
 }

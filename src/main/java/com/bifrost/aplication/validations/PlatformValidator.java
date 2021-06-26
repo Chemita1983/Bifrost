@@ -7,6 +7,6 @@ public class PlatformValidator extends BifrostValidator<ValidPlatform, Platform>
 
     @Override
     public boolean validBifrostEntity(Platform platform) {
-        return validBifrostEntity(platform);
+        return true;
     }
 }
