@@ -28,7 +28,7 @@ public class VideogamesController {
         return videogameService.readByName(name);
     }
 
-    @GetMapping(value = PATH + "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Videogame> getVideogames() {
         return videogameService.readAll();
     }

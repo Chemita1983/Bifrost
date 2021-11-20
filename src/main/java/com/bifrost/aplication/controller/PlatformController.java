@@ -17,15 +17,17 @@ import java.util.List;
 @Validated
 public class PlatformController {
 
+    private static final String PATH = "platform";
+
     @Autowired
     private PlatformServiceImpl platformService;
 
-    @GetMapping(value = "/getAllPlatforms", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Platform> getPlatformById() {
         return platformService.readAll();
     }
 
-    @PostMapping(value = "/addPlatform", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Platform addPlatform(@RequestBody @ValidPlatform Platform platform) {
         return platformService.add(platform);
     }
