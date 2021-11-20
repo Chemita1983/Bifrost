@@ -19,4 +19,5 @@ public class BifrostEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private int id;
+
 }
