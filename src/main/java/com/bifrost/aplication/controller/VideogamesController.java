@@ -6,11 +6,7 @@ import com.bifrost.aplication.service.impl.VideogameServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,22 +14,23 @@ import java.util.List;
 @Validated
 public class VideogamesController {
 
-    private static final String PATH = "videogame";
+    private static final String PATH_VIDEOGAME = "videogame";
+    private static final String PATH_VIDEOGAMES = "videogames";
 
     @Autowired
     private VideogameServiceImpl videogameService;
 
-    @GetMapping(value = PATH + "/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Videogame> getVideogameByName(@PathVariable("name") String name) {
+    @GetMapping(value = PATH_VIDEOGAME, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Videogame> getVideogameByName(@RequestParam("name") String name) {
         return videogameService.readByName(name);
     }
 
-    @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = PATH_VIDEOGAMES, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Videogame> getVideogames() {
         return videogameService.readAll();
     }
 
-    @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = PATH_VIDEOGAME, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Videogame addVideogame(@RequestBody @ValidVideogame Videogame videogame) {
         return videogameService.add(videogame);
     }
