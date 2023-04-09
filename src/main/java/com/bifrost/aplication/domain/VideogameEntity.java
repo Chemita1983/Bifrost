@@ -19,7 +19,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Table(name = "videogames")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Videogame extends BifrostEntity {
+public class VideogameEntity extends BifrostEntity {
 
     private String videogameName;
 
@@ -29,11 +29,11 @@ public class Videogame extends BifrostEntity {
 
     @OneToOne
     @JoinColumn(name = "platform_id")
-    private Platform platform;
+    private PlatformEntity platformEntity;
 
     @OneToOne
     @JoinColumn(name = "digital_platform_id")
-    private DigitalPlatform digitalPlatform;
+    private DigitalPlatformEntity digitalPlatformEntity;
 
     private String companyName;
 

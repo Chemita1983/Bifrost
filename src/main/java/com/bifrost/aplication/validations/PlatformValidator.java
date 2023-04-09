@@ -1,12 +1,12 @@
 package com.bifrost.aplication.validations;
 
 import com.bifrost.aplication.annotations.ValidPlatform;
-import com.bifrost.aplication.domain.Platform;
+import com.bifrost.aplication.domain.PlatformEntity;
 
-public class PlatformValidator extends BifrostValidator<ValidPlatform, Platform> {
+public class PlatformValidator extends BifrostValidator<ValidPlatform, PlatformEntity> {
 
     @Override
-    public boolean validBifrostEntity(Platform platform) {
+    public boolean validBifrostEntity(PlatformEntity platformEntity) {
         return true;
     }
 }

@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Table(name = "platform")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Platform extends BifrostEntity {
+public class PlatformEntity extends BifrostEntity {
 
     @Column(name = "platform_name")
     private String platformName;

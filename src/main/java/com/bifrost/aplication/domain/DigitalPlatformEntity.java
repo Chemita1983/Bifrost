@@ -1,11 +1,7 @@
 package com.bifrost.aplication.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +15,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Table(name = "digital_platform")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DigitalPlatform extends BifrostEntity {
+public class DigitalPlatformEntity extends BifrostEntity {
 
     @Column(name = "digital_platform_name")
     private String digitalPlatformName;
