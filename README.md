@@ -1,6 +1,6 @@
 <div align="center">
 
-<pre>
+<pre align="center">
 ██████╗  ██╗ ███████╗  ██████╗   ██████╗  ███████╗  ████████╗
 ██╔══██╗ ██║ ██╔════╝  ██╔══██╗ ██╔═══██╗ ██╔════╝  ╚══██╔══╝
 ██████╔╝ ██║ █████╗    ██████╔╝ ██║   ██║ ███████╗     ██║
@@ -25,7 +25,7 @@
   &nbsp;&nbsp;&nbsp;
   <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/playstation.svg" alt="PlayStation" height="64">
   &nbsp;&nbsp;&nbsp;
-  <img src="https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg" alt="Nintendo" height="64">
+  <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Nintendo.svg/960px-Nintendo.svg.png?utm_source=commons.wikimedia.org&amp;utm_campaign=readme&amp;utm_content=thumbnail" alt="Nintendo" height="64">
 </p>
 
 ## What is Bifröst?
