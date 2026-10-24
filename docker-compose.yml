@@ -1,0 +1,22 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: bifrost-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-bifrost}
+      MARIADB_USER: ${DB_USER:-bifrost}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-bifrost}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-bifrost-root}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - bifrost_videogames_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  bifrost_videogames_data:
