@@ -2,6 +2,20 @@
 
 Todos los cambios relevantes de Bifröst se documentarán en este archivo.
 
+## [0.3.0-SNAPSHOT] - 2026-10-24
+
+### Cambiado
+
+- Reorganizado el proyecto siguiendo arquitectura hexagonal.
+- Separado el dominio de las entidades JPA.
+- Añadidos puertos de entrada y salida para videojuegos, plataformas y tiendas digitales.
+- Añadidos adaptadores de entrada web y salida de persistencia.
+- Añadidos DTOs y mappers para las capas web y de persistencia.
+- Eliminada la estructura antigua basada en `BifrostService` y servicios genéricos.
+- Corregida la nomenclatura de paquetes a `com.bifrost`.
+- Añadidos endpoints para plataformas digitales.
+- Añadidos tests unitarios de controladores, servicios, mappers y persistencia.
+
 ## [0.2.0-SNAPSHOT] - 2026-10-24
 
 ### Cambiado
