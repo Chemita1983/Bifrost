@@ -8,7 +8,7 @@ public record VideogameResponse(
         String videogameType,
         String videogameYear,
         VideogamePlatformResponse platform,
-        DigitalPlatformResponse digitalPlatform,
+        VideogameDigitalPlatformResponse digitalPlatform,
         String companyName,
         int isDigital,
         int isCompleted,
@@ -20,7 +20,7 @@ public record VideogameResponse(
                 videogame.getYear(), videogame.getPlatform() == null ? null
                 : VideogamePlatformResponse.from(videogame.getPlatform()),
                 videogame.getDigitalPlatform() == null ? null
-                        : DigitalPlatformResponse.from(videogame.getDigitalPlatform()),
+                        : VideogameDigitalPlatformResponse.from(videogame.getDigitalPlatform()),
                 videogame.getCompanyName(), videogame.getDigital(), videogame.getCompleted(),
                 videogame.getPlatinum(), videogame.isMultiplayer());
     }
