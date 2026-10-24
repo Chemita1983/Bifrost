@@ -58,7 +58,7 @@ public class PersistenceMapper {
                 entity.getVideogameYear(), toDomain(entity.getPlatformEntity()),
                 toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(),
                 entity.getIsDigital(), entity.getIsCompleted(), entity.getIsPlatinum(),
-                entity.getPlayers());
+                entity.isMultiplayer());
     }
 
     public VideogameEntity toEntity(Videogame videogame) {
@@ -76,7 +76,7 @@ public class PersistenceMapper {
         entity.setIsDigital(videogame.getDigital());
         entity.setIsCompleted(videogame.getCompleted());
         entity.setIsPlatinum(videogame.getPlatinum());
-        entity.setPlayers(videogame.getPlayers());
+        entity.setMultiplayer(videogame.isMultiplayer());
         return entity;
     }
 

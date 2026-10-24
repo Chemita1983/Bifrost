@@ -38,7 +38,7 @@ public class WebMapper {
 
         return new Videogame(null, request.videogameName(), request.videogameType(),
                 request.videogameYear(), platform, digitalPlatform, request.companyName(),
-                request.isDigital(), request.isCompleted(), request.isPlatinum(), request.players());
+                request.isDigital(), request.isCompleted(), request.isPlatinum(), request.multiplayer());
     }
 
     public VideogameResponse toResponse(Videogame videogame) {

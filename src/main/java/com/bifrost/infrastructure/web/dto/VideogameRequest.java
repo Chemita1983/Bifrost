@@ -10,5 +10,5 @@ public record VideogameRequest(
         int isDigital,
         int isCompleted,
         int isPlatinum,
-        int players) {
+        boolean multiplayer) {
 }

@@ -40,6 +40,6 @@ public class VideogameEntity extends BifrostEntity {
 
     private int isPlatinum;
 
-    private int players;
+    private boolean multiplayer;
 
 }
