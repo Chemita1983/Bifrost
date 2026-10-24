@@ -1,14 +1,12 @@
 <div align="center">
 
 <pre align="center">
-██████╗  ██╗ ███████╗  ██████╗   ██████╗  ███████╗  ████████╗
-██╔══██╗ ██║ ██╔════╝  ██╔══██╗ ██╔═══██╗ ██╔════╝  ╚══██╔══╝
+   ██████╗  ██╗ ███████╗  ██████╗   ██████╗  ███████╗  ████████╗
+   ██╔══██╗ ██║ ██╔════╝  ██╔══██╗ ██╔═══██╗ ██╔════╝  ╚══██╔══╝
 ██████╔╝ ██║ █████╗    ██████╔╝ ██║   ██║ ███████╗     ██║
 ██╔══██╗ ██║ ██╔══╝    ██╔══██╗ ██║   ██║ ╚════██║     ██║
 ██████╔╝ ██║ ██║       ██║  ██║ ╚██████╔╝ ███████║     ██║
 ╚═════╝  ╚═╝ ╚═╝       ╚═╝  ╚═╝  ╚═════╝  ╚══════╝     ╚═╝
-
-                         BIFRÖST
 </pre>
 
 <strong>Your video game collection across every world</strong>
@@ -23,8 +21,10 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/steam.svg" alt="Steam" height="64">
   &nbsp;&nbsp;&nbsp;
+  
   <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/playstation.svg" alt="PlayStation" height="64">
   &nbsp;&nbsp;&nbsp;
+  
   <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Nintendo.svg/960px-Nintendo.svg.png?utm_source=commons.wikimedia.org&amp;utm_campaign=readme&amp;utm_content=thumbnail" alt="Nintendo" height="64">
 </p>
 
