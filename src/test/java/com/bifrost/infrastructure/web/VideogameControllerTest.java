@@ -57,7 +57,7 @@ class VideogameControllerTest {
 
         VideogameResponse result = controller.addVideogame(
                 new VideogameRequest("Mario", "Platform", "2020", null, null,
-                        "Nintendo", 0, 0, 0, 1));
+                        "Nintendo", 0, 0, 0, false));
 
         assertThat(result).isNotNull();
         verify(videogameUseCase).create(any(Videogame.class));

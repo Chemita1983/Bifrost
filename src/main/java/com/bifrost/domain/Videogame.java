@@ -12,14 +12,14 @@ public class Videogame {
     private int digital;
     private int completed;
     private int platinum;
-    private int players;
+    private boolean multiplayer;
 
     public Videogame() {
     }
 
     public Videogame(Integer id, String name, String type, String year, Platform platform,
                      DigitalPlatform digitalPlatform, String companyName, int digital,
-                     int completed, int platinum, int players) {
+                      int completed, int platinum, boolean multiplayer) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -30,7 +30,7 @@ public class Videogame {
         this.digital = digital;
         this.completed = completed;
         this.platinum = platinum;
-        this.players = players;
+        this.multiplayer = multiplayer;
     }
 
     public Integer getId() {
@@ -113,11 +113,11 @@ public class Videogame {
         this.platinum = platinum;
     }
 
-    public int getPlayers() {
-        return players;
+    public boolean isMultiplayer() {
+        return multiplayer;
     }
 
-    public void setPlayers(int players) {
-        this.players = players;
+    public void setMultiplayer(boolean multiplayer) {
+        this.multiplayer = multiplayer;
     }
 }

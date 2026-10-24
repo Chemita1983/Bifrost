@@ -7,21 +7,21 @@ public record VideogameResponse(
         String videogameName,
         String videogameType,
         String videogameYear,
-        PlatformResponse platform,
+        VideogamePlatformResponse platform,
         DigitalPlatformResponse digitalPlatform,
         String companyName,
         int isDigital,
         int isCompleted,
         int isPlatinum,
-        int players) {
+        boolean multiplayer) {
 
     public static VideogameResponse from(Videogame videogame) {
         return new VideogameResponse(videogame.getId(), videogame.getName(), videogame.getType(),
                 videogame.getYear(), videogame.getPlatform() == null ? null
-                : PlatformResponse.from(videogame.getPlatform()),
+                : VideogamePlatformResponse.from(videogame.getPlatform()),
                 videogame.getDigitalPlatform() == null ? null
                         : DigitalPlatformResponse.from(videogame.getDigitalPlatform()),
                 videogame.getCompanyName(), videogame.getDigital(), videogame.getCompleted(),
-                videogame.getPlatinum(), videogame.getPlayers());
+                videogame.getPlatinum(), videogame.isMultiplayer());
     }
 }
