@@ -1,8 +1,9 @@
 package com.bifrost.infrastructure.web.dto;
 
 import com.bifrost.domain.DigitalPlatform;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public record DigitalPlatformResponse(Integer id, String digitalPlatformName,
+public record DigitalPlatformResponse(@JsonIgnore Integer id, String digitalPlatformName,
                                       String digitalPlatformCompany) {
 
     public static DigitalPlatformResponse from(DigitalPlatform platform) {
