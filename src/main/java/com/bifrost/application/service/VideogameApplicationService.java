@@ -1,0 +1,37 @@
+package com.bifrost.application.service;
+
+import com.bifrost.application.port.in.VideogameUseCase;
+import com.bifrost.application.port.out.VideogameRepositoryPort;
+import com.bifrost.domain.Videogame;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class VideogameApplicationService implements VideogameUseCase {
+
+    private final VideogameRepositoryPort videogameRepository;
+
+    public VideogameApplicationService(VideogameRepositoryPort videogameRepository) {
+        this.videogameRepository = videogameRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Videogame> getAll() {
+        return videogameRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Videogame> getByName(String name) {
+        return videogameRepository.findByNameContaining(name);
+    }
+
+    @Override
+    @Transactional
+    public Videogame create(Videogame videogame) {
+        return videogameRepository.save(videogame);
+    }
+}
