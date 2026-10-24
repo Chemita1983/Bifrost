@@ -2,8 +2,8 @@ package com.bifrost.aplication.validations;
 
 import com.bifrost.aplication.domain.BifrostEntity;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.lang.annotation.Annotation;
 
 /**
