@@ -173,9 +173,9 @@ cannot be deleted and returns 409; existing games are preserved.
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,
-and persistence adapters, as well as a Spring Boot context test. The isolated
-MockMvc and persistence adapter tests mock JPA; they do not verify query execution
-against MariaDB.
+and persistence adapters. Isolated MockMvc and persistence adapter tests mock
+JPA. Integration tests use MockMvc, Spring Data JPA and a disposable MariaDB
+11.4 Testcontainers instance to exercise requests, filters and foreign keys.
 
 ## Getting started
 
@@ -197,17 +197,20 @@ docker compose up -d
 mvn clean test
 ```
 
-The Spring Boot context test uses the configured MariaDB datasource and the
-application's `ddl-auto: update` setting. Do not run it against a database
-whose schema or data must be preserved. To run only isolated unit and web tests:
+Docker must be running and accessible to Testcontainers; the MariaDB 11.4 and
+Testcontainers helper images must be available locally or downloadable. No
+Compose database or pre-existing data is required for tests. The integration
+test overrides the datasource URL and credentials with the container values and
+uses `ddl-auto: create-drop`. If the container cannot start, the test fails
+instead of falling back to the configured application database. To run only
+isolated unit and web tests without Docker:
 
 ```bash
 mvn -Dtest='*Test,!BifrostApplicationTests' test
 ```
 
-The schema migration and create/update operations were manually checked against
-a disposable MariaDB restored from a backup. This does not replace automated
-database integration tests.
+The integration tests create their own small fixtures; they do not exercise the
+one-time schema migration or require a backup.
 
 Concurrent updates to the same record can overwrite each other. The current
 implementation is intended for personal use and does not prevent this conflict.
