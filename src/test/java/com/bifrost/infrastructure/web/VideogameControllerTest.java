@@ -12,9 +12,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,5 +69,31 @@ class VideogameControllerTest {
 
         assertThat(result).isNotNull();
         verify(videogameUseCase).create(any(Videogame.class));
+    }
+
+    @Test
+    void shouldUpdateVideogame() {
+        Videogame current = new Videogame(1, "Mario", "Platform", "2020", null, null, "Nintendo", 0, 0, 0, false);
+        when(videogameUseCase.update(eq(1), any())).thenAnswer(invocation -> {
+            UnaryOperator<Videogame> update = invocation.getArgument(1);
+            return Optional.of(update.apply(current));
+        });
+
+        VideogameResponse result = controller.updateVideogame(1, Map.of("videogameName", "Luigi"));
+
+        assertThat(result.videogameName()).isEqualTo("Luigi");
+        assertThat(result.videogameType()).isEqualTo("Platform");
+        verify(videogameUseCase).update(eq(1), any());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingMissingVideogame() {
+        when(videogameUseCase.update(eq(1), any())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> controller.updateVideogame(1, Map.of("videogameName", "Luigi")))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(exception -> assertThat(((ResponseStatusException) exception).getStatusCode())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
+        verify(videogameUseCase).update(eq(1), any());
     }
 }
