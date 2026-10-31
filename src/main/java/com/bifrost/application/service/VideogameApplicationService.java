@@ -27,6 +27,12 @@ public class VideogameApplicationService implements VideogameUseCase {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type) {
+        return videogameRepository.findFiltered(platformId, isDigital, isCompleted, multiplayer, type);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Videogame> getByName(String name) {
         return videogameRepository.findByNameContaining(name);
     }

@@ -33,6 +33,32 @@ class UpdateEndpointsTest {
     ).setControllerAdvice(new ApiExceptionHandler()).build();
 
     @Test
+    void videogameFiltersReachMockRepositoryAndReturnArray() throws Exception {
+        VideogameEntity game = new VideogameEntity();
+        game.setVideogameName("Example");
+        when(games.findFiltered(4, 0, 0, true, "rPg")).thenReturn(List.of(game));
+        mvc.perform(get("/videogames").param("platformId", "4").param("isDigital", "false")
+                        .param("isCompleted", "false").param("multiplayer", "true").param("type", "rPg"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].videogameName").value("Example"));
+        verify(games).findFiltered(4, 0, 0, true, "rPg");
+        mvc.perform(get("/videogames").param("type", "Shooter"))
+                .andExpect(status().isOk()).andExpect(content().json("[]"));
+        verify(games).findFiltered(null, null, null, null, "Shooter");
+        mvc.perform(get("/videogames")).andExpect(status().isOk()).andExpect(content().json("[]"));
+        verify(games).findAll();
+    }
+
+    @Test
+    void videogameFiltersRejectInvalidParameters() throws Exception {
+        for (String[] parameter : new String[][] {{"platformId", "abc"}, {"platformId", ""},
+                {"platformId", "999999999999"}, {"isDigital", "1"}, {"isCompleted", "nope"},
+                {"multiplayer", ""}, {"type", " "}}) {
+            mvc.perform(get("/videogames").param(parameter[0], parameter[1])).andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(games);
+    }
+
+    @Test
     void patchesPlatformAndStoreWithoutChangingOmittedFields() throws Exception {
         PlatformEntity platform = new PlatformEntity(); platform.setId(1); platform.setPlatformName("Old");
         platform.setPlatformCompany("Nintendo"); platform.setPlatformYear("2017");

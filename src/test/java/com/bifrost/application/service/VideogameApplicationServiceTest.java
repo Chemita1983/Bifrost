@@ -40,6 +40,14 @@ class VideogameApplicationServiceTest {
     }
 
     @Test
+    void filteredSearchDelegatesAllValuesIncludingFalse() {
+        List<Videogame> games = List.of(new Videogame());
+        when(videogameRepository.findFiltered(4, false, false, true, "rPg")).thenReturn(games);
+        assertThat(service.getFiltered(4, false, false, true, "rPg")).isSameAs(games);
+        verify(videogameRepository).findFiltered(4, false, false, true, "rPg");
+    }
+
+    @Test
     void shouldGetVideogamesByName() {
         List<Videogame> videogames = List.of(new Videogame());
         when(videogameRepository.findByNameContaining("zelda")).thenReturn(videogames);

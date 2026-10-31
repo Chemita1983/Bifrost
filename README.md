@@ -132,6 +132,18 @@ The REST layer uses request and response DTOs. Mappers translate between the
 external API representation and the internal domain model, preventing web
 contracts from leaking into the business layer.
 
+`GET /videogames` lists all video games as before, or accepts any combination
+of these optional query parameters (combined with AND):
+
+- `platformId`: positive integer platform ID.
+- `isDigital`, `isCompleted`, `multiplayer`: `true` or `false` (case-insensitive).
+- `type`: nonblank, case-insensitive partial match on the video game type, e.g. `rpg` or `shooter`.
+
+For example, `GET /videogames?platformId=2&isDigital=false&isCompleted=false&type=rpg`
+returns matching physical, incomplete games. Incomplete means `isCompleted=0`;
+it does not imply the game has not been started. No matches return `[]`.
+Invalid filter values return HTTP 400. Results are not paginated.
+
 Existing records can be partially updated with `PATCH /videogame/{id}`,
 `PATCH /platform/{id}`, and `PATCH /digital-platform/{id}`, using the same
 field names as POST. Omitted fields are preserved. An unknown record or related
@@ -151,7 +163,9 @@ cannot be deleted and returns 409; existing games are preserved.
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,
-and persistence adapters, as well as a Spring Boot context test.
+and persistence adapters, as well as a Spring Boot context test. The isolated
+MockMvc and persistence adapter tests mock JPA; they do not verify query execution
+against MariaDB.
 
 ## Getting started
 

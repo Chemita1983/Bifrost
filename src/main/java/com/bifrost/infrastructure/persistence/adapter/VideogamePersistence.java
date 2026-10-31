@@ -41,6 +41,13 @@ public class VideogamePersistence implements VideogameRepositoryPort {
     }
 
     @Override
+    public List<Videogame> findFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type) {
+        return videogamesRepository.findFiltered(platformId, isDigital == null ? null : isDigital ? 1 : 0,
+                isCompleted == null ? null : isCompleted ? 1 : 0, multiplayer, type).stream()
+                .map(mapper::toDomain).toList();
+    }
+
+    @Override
     public List<Videogame> findByNameContaining(String name) {
         return videogamesRepository.findByVideogameNameContaining(name).stream()
                 .map(mapper::toDomain).toList();

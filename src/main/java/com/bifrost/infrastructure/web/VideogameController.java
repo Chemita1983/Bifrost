@@ -45,9 +45,41 @@ public class VideogameController {
 	}
 
 	@GetMapping(value = PATH_VIDEOGAMES, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<VideogameResponse> getVideogames() {
-        return videogameUseCase.getAll().stream().map(webMapper::toResponse).toList();
-	}
+	public List<VideogameResponse> getVideogames(
+            @RequestParam(value = "platformId", required = false) String platformId,
+            @RequestParam(value = "isDigital", required = false) String isDigital,
+            @RequestParam(value = "isCompleted", required = false) String isCompleted,
+            @RequestParam(value = "multiplayer", required = false) String multiplayer,
+            @RequestParam(value = "type", required = false) String type) {
+        Integer platform = null;
+        if (platformId != null) {
+            try {
+                platform = Integer.valueOf(platformId);
+            } catch (NumberFormatException ex) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid platformId");
+            }
+            if (platform <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid platformId");
+            }
+        }
+        Boolean digital = parseBoolean(isDigital, "isDigital");
+        Boolean completed = parseBoolean(isCompleted, "isCompleted");
+        Boolean multi = parseBoolean(multiplayer, "multiplayer");
+        if (type != null && type.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type");
+        }
+        List<Videogame> result = platformId == null && isDigital == null && isCompleted == null
+                && multiplayer == null && type == null ? videogameUseCase.getAll()
+                : videogameUseCase.getFiltered(platform, digital, completed, multi, type);
+        return result.stream().map(webMapper::toResponse).toList();
+    }
+
+    private Boolean parseBoolean(String value, String name) {
+        if (value == null) return null;
+        if ("true".equalsIgnoreCase(value)) return true;
+        if ("false".equalsIgnoreCase(value)) return false;
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + name);
+    }
 
 	@PostMapping(value = PATH_VIDEOGAME, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
