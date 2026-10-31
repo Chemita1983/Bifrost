@@ -7,9 +7,12 @@ import java.util.Map;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,5 +53,16 @@ public class DigitalPlatformController {
                 PatchRequest.merge(body, webMapper.toRequest(current), DigitalPlatformRequest.class)))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    @DeleteMapping(PATH + "/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDigitalPlatform(@PathVariable("id") Integer id) {
+        try {
+            if (!digitalPlatformUseCase.delete(id)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "DigitalPlatform not found");
+            }
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Resource is in use", ex);
+        }
     }
 }

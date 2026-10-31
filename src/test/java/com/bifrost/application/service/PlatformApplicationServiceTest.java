@@ -60,4 +60,11 @@ class PlatformApplicationServiceTest {
         assertThat(result).isSameAs(platform);
         verify(platformRepository).save(platform);
     }
+    @Test
+    void deleteDelegatesAndReturnsRepositoryResult() {
+        when(platformRepository.delete(1)).thenReturn(true, false);
+        assertThat(service.delete(1)).isTrue();
+        assertThat(service.delete(1)).isFalse();
+        org.mockito.Mockito.verify(platformRepository, org.mockito.Mockito.times(2)).delete(1);
+    }
 }

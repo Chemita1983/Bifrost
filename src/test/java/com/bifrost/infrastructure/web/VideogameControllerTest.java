@@ -96,4 +96,12 @@ class VideogameControllerTest {
                         .isEqualTo(HttpStatus.NOT_FOUND));
         verify(videogameUseCase).update(eq(1), any());
     }
+    @Test
+    void deleteHandlesExistingAndMissingId() {
+        when(videogameUseCase.delete(1)).thenReturn(true, false);
+        controller.deleteVideogame(1);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deleteVideogame(1))
+                .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND));
+    }
 }

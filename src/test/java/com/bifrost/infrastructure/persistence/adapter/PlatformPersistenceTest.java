@@ -60,4 +60,11 @@ class PlatformPersistenceTest {
         assertThat(result).isNotNull();
         verify(platformRepository).save(org.mockito.ArgumentMatchers.any(PlatformEntity.class));
     }
+    @Test
+    void deleteReturnsWhetherRowWasAffected() {
+        when(platformRepository.deleteByIdAndReturnCount(1)).thenReturn(1, 0);
+        assertThat(adapter.delete(1)).isTrue();
+        assertThat(adapter.delete(1)).isFalse();
+        org.mockito.Mockito.verify(platformRepository, org.mockito.Mockito.times(2)).deleteByIdAndReturnCount(1);
+    }
 }

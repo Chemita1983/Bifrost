@@ -49,4 +49,11 @@ class DigitalPlatformApplicationServiceTest {
         assertThat(result).isSameAs(platform);
         verify(digitalPlatformJpa).save(platform);
     }
+    @Test
+    void deleteDelegatesAndReturnsRepositoryResult() {
+        when(digitalPlatformJpa.delete(1)).thenReturn(true, false);
+        assertThat(service.delete(1)).isTrue();
+        assertThat(service.delete(1)).isFalse();
+        org.mockito.Mockito.verify(digitalPlatformJpa, org.mockito.Mockito.times(2)).delete(1);
+    }
 }

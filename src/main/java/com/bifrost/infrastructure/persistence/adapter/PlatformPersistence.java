@@ -46,4 +46,8 @@ public class PlatformPersistence implements PlatformRepositoryPort {
             return mapper.toDomain(entity);
         });
     }
+    @Override
+    public boolean delete(Integer id) {
+        return platformRepository.deleteByIdAndReturnCount(id) > 0;
+    }
 }

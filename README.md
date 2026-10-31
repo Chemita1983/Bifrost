@@ -143,6 +143,11 @@ status fields must be integers 0 or 1, and `multiplayer` must be a boolean.
 Unknown fields and invalid types are rejected with 400 before modifying data.
 POST behavior is unchanged.
 
+Records can be deleted using `DELETE /videogame/{id}`, `DELETE /platform/{id}`,
+and `DELETE /digital-platform/{id}`. Successful deletion returns 204 and an
+unknown ID returns 404. A platform or digital store referenced by a video game
+cannot be deleted and returns 409; existing games are preserved.
+
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,

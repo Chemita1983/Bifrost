@@ -49,4 +49,11 @@ class DigitalPlatformPersistenceTest {
         assertThat(result).isNotNull();
         verify(digitalPlatformJpa).save(org.mockito.ArgumentMatchers.any(DigitalPlatformEntity.class));
     }
+    @Test
+    void deleteReturnsWhetherRowWasAffected() {
+        when(digitalPlatformJpa.deleteByIdAndReturnCount(1)).thenReturn(1, 0);
+        assertThat(adapter.delete(1)).isTrue();
+        assertThat(adapter.delete(1)).isFalse();
+        org.mockito.Mockito.verify(digitalPlatformJpa, org.mockito.Mockito.times(2)).deleteByIdAndReturnCount(1);
+    }
 }

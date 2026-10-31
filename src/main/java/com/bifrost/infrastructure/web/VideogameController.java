@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,5 +59,12 @@ public class VideogameController {
                 PatchRequest.merge(body, webMapper.toRequest(current), VideogameRequest.class)))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    @DeleteMapping(PATH_VIDEOGAME + "/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteVideogame(@PathVariable("id") Integer id) {
+        if (!videogameUseCase.delete(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Videogame not found");
+        }
     }
 }

@@ -35,4 +35,9 @@ public class DigitalPlatformApplicationService implements DigitalPlatformUseCase
     public Optional<DigitalPlatform> update(Integer id, UnaryOperator<DigitalPlatform> patch) {
         return digitalPlatformJpa.update(id, patch);
     }
+    @Override
+    @Transactional
+    public boolean delete(Integer id) {
+        return digitalPlatformJpa.delete(id);
+    }
 }

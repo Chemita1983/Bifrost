@@ -8,6 +8,7 @@ All notable changes to Bifröst will be documented in this file.
 
 - PATCH endpoints for partially updating video games, platforms, and digital stores.
 - Validation of update fields and unit tests for the controllers.
+- DELETE endpoints for video games, platforms, and digital stores; associated platforms and stores cannot be deleted.
 
 ### Changed
 

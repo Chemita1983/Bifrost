@@ -41,4 +41,8 @@ public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort
             return mapper.toDomain(entity);
         });
     }
+    @Override
+    public boolean delete(Integer id) {
+        return digitalPlatformJpa.deleteByIdAndReturnCount(id) > 0;
+    }
 }

@@ -78,4 +78,8 @@ public class VideogamePersistence implements VideogameRepositoryPort {
             return mapper.toDomain(entity);
         });
     }
+    @Override
+    public boolean delete(Integer id) {
+        return videogamesRepository.deleteByIdAndReturnCount(id) > 0;
+    }
 }

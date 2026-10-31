@@ -72,4 +72,11 @@ class VideogamePersistenceTest {
         assertThat(result).isNotNull();
         verify(videogamesRepository).save(org.mockito.ArgumentMatchers.any(VideogameEntity.class));
     }
+    @Test
+    void deleteReturnsWhetherRowWasAffected() {
+        when(videogamesRepository.deleteByIdAndReturnCount(1)).thenReturn(1, 0);
+        assertThat(adapter.delete(1)).isTrue();
+        assertThat(adapter.delete(1)).isFalse();
+        org.mockito.Mockito.verify(videogamesRepository, org.mockito.Mockito.times(2)).deleteByIdAndReturnCount(1);
+    }
 }

@@ -142,4 +142,22 @@ class UpdateEndpointsTest {
         mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}")) .andExpect(status().isOk());
         mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}")) .andExpect(status().isOk());
     }
+    @Test
+    void deleteEndpointsReturnNoContentOrNotFound() throws Exception {
+        when(games.deleteByIdAndReturnCount(1)).thenReturn(1);
+        when(platforms.deleteByIdAndReturnCount(1)).thenReturn(1);
+        when(stores.deleteByIdAndReturnCount(1)).thenReturn(1);
+        for (String path : new String[]{"/videogame", "/platform", "/digital-platform"}) {
+            mvc.perform(delete(path + "/1")).andExpect(status().isNoContent()).andExpect(content().string(""));
+            mvc.perform(delete(path + "/99")).andExpect(status().isNotFound());
+        }
+    }
+
+    @Test
+    void deleteReferencedPlatformOrStoreReturnsConflict() throws Exception {
+        when(platforms.deleteByIdAndReturnCount(1)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("FK"));
+        when(stores.deleteByIdAndReturnCount(1)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("FK"));
+        mvc.perform(delete("/platform/1")).andExpect(status().isConflict());
+        mvc.perform(delete("/digital-platform/1")).andExpect(status().isConflict());
+    }
 }
