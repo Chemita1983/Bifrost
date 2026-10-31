@@ -1,5 +1,6 @@
 # Changelog
 
+
 All notable changes to Bifröst will be documented in this file.
 
 ## [Unreleased]
@@ -18,6 +19,8 @@ All notable changes to Bifröst will be documented in this file.
 - DELETE endpoints for video games, platforms, and digital stores; associated platforms and stores cannot be deleted.
 
 ### Changed
+
+- Require existing videogame platforms and digital platforms for digital games on create and merged updates; reject invalid relations with HTTP 400.
 
 - The Spring Boot test uses a disposable database with `create-drop` rather than
   the application's configured datasource; Docker is required for the full suite.

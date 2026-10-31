@@ -35,16 +35,18 @@ class UpdateEndpointsTest {
     @Test
     void hoursAreCreatedReadPreservedUpdatedAndCleared() throws Exception {
         when(games.save(any(VideogameEntity.class))).thenAnswer(i -> i.getArgument(0));
+        PlatformEntity platform = new PlatformEntity(); platform.setId(4);
+        when(platforms.findById(4)).thenReturn(Optional.of(platform));
         for (String suffix : new String[] {"", ",\"hoursPlayed\":null", ",\"hoursPlayed\":0", ",\"hoursPlayed\":42"}) {
             var result = mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"videogameName\":\"Game\"" + suffix + "}"))
+                    .content("{\"videogameName\":\"Game\",\"platformId\":4" + suffix + "}"))
                     .andExpect(status().isOk());
             if (suffix.endsWith(":0")) result.andExpect(jsonPath("$.hoursPlayed").value(0));
             else if (suffix.endsWith(":42")) result.andExpect(jsonPath("$.hoursPlayed").value(42));
             else result.andExpect(jsonPath("$.hoursPlayed").doesNotExist());
         }
         VideogameEntity game = new VideogameEntity();
-        game.setId(3); game.setVideogameName("Game"); game.setHoursPlayed(42);
+        game.setId(3); game.setVideogameName("Game"); game.setHoursPlayed(42); game.setPlatformEntity(platform);
         when(games.findById(3)).thenReturn(Optional.of(game));
         when(games.findAll()).thenReturn(List.of(game));
         mvc.perform(get("/videogames")).andExpect(status().isOk()).andExpect(jsonPath("$[0].hoursPlayed").value(42));
@@ -126,6 +128,8 @@ class UpdateEndpointsTest {
         DigitalPlatformEntity store = new DigitalPlatformEntity(); store.setId(5);
         game.setPlatformEntity(platform); game.setDigitalPlatformEntity(store);
         when(games.findById(3)).thenReturn(Optional.of(game));
+        when(platforms.findById(4)).thenReturn(Optional.of(platform));
+        when(stores.findById(5)).thenReturn(Optional.of(store));
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"isDigital\":0,\"isCompleted\":0,\"isPlatinum\":0,\"multiplayer\":false}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.videogameName").value("Original"));
@@ -133,10 +137,9 @@ class UpdateEndpointsTest {
         assertThat(game.getIsPlatinum()).isZero(); assertThat(game.isMultiplayer()).isFalse();
         assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"platformId\":null,\"digitalPlatformId\":null}")) .andExpect(status().isOk());
-        assertThat(game.getPlatformEntity()).isNull(); assertThat(game.getDigitalPlatformEntity()).isNull();
+                .content("{\"digitalPlatformId\":null}")) .andExpect(status().isOk());
+        assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isNull();
         assertThat(game.getVideogameName()).isEqualTo("Original");
-        verifyNoInteractions(platforms, stores);
     }
 
     @Test
@@ -153,9 +156,9 @@ class UpdateEndpointsTest {
                 .andExpect(jsonPath("$.digitalPlatform.id").value(5));
         assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"videogameName\":\"Changed\",\"platformId\":99}")) .andExpect(status().isNotFound());
+                .content("{\"videogameName\":\"Changed\",\"platformId\":99}")) .andExpect(status().isBadRequest());
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"videogameName\":\"Changed\",\"digitalPlatformId\":99}")) .andExpect(status().isNotFound());
+                .content("{\"videogameName\":\"Changed\",\"digitalPlatformId\":99}")) .andExpect(status().isBadRequest());
         assertThat(game.getVideogameName()).isEqualTo("Original");
         assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
     }
@@ -201,11 +204,13 @@ class UpdateEndpointsTest {
     }
 
     @Test
-    void postRemainsUnchanged() throws Exception {
+    void postAcceptsValidResources() throws Exception {
+        PlatformEntity platform = new PlatformEntity(); platform.setId(4);
+        when(platforms.findById(4)).thenReturn(Optional.of(platform));
         when(games.save(any(VideogameEntity.class))).thenAnswer(i -> i.getArgument(0));
         when(platforms.save(any(PlatformEntity.class))).thenAnswer(i -> i.getArgument(0));
         when(stores.save(any(DigitalPlatformEntity.class))).thenAnswer(i -> i.getArgument(0));
-        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"Game\"}")) .andExpect(status().isOk());
+        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"Game\",\"platformId\":4}")) .andExpect(status().isOk());
         mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}")) .andExpect(status().isOk());
         mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}")) .andExpect(status().isOk());
     }
