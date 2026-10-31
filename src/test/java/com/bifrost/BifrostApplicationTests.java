@@ -67,8 +67,8 @@ class BifrostApplicationTests {
                 """.formatted(platform, digital));
         create("/videogame", """
                 {"videogameName":"Second", "videogameType":"RPG", "isDigital":1,
-                 "isCompleted":1, "multiplayer":true, "hoursPlayed":12}
-                """);
+                 "isCompleted":1, "multiplayer":true, "hoursPlayed":12, "platformId":%d, "digitalPlatformId":%d}
+                """.formatted(platform, digital));
         mvc.perform(get("/videogame").param("name", "First"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(game))
                 .andExpect(jsonPath("$[0].platform.id").value(platform))
@@ -132,11 +132,57 @@ class BifrostApplicationTests {
         mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"videogameName\":\"Invalid\",\"hoursPlayed\":-1}"))
                 .andExpect(status().isBadRequest());
-        int id = create("/videogame", "{\"videogameName\":\"Valid\",\"hoursPlayed\":5}");
+        int platform = create("/platform", "{\"platformName\":\"Console\"}");
+        int id = create("/videogame", "{\"videogameName\":\"Valid\",\"hoursPlayed\":5,\"platformId\":" + platform + "}");
         mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"hoursPlayed\":1.5}"))
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/videogame").param("name", "Valid"))
                 .andExpect(jsonPath("$[0].hoursPlayed").value(5));
     }
+    @Test
+    void requiredRelationsAreValidatedWithoutPersistingInvalidRequests() throws Exception {
+        int platform = create("/platform", "{\"platformName\":\"Console\"}");
+        int store = create("/digital-platform", "{\"digitalPlatformName\":\"Store\"}");
+        String[][] invalid = {
+                {"{\"videogameName\":\"Missing\"}", "The videogame platform must be specified"},
+                {"{\"videogameName\":\"Missing\",\"platformId\":999999}", "The specified platform does not exist"},
+                {"{\"videogameName\":\"Missing\",\"platformId\":" + platform + ",\"isDigital\":1}", "The digital platform must be specified for digital videogames"},
+                {"{\"videogameName\":\"Missing\",\"platformId\":" + platform + ",\"digitalPlatformId\":999999}", "The specified digital platform does not exist"}
+        };
+        for (String[] request : invalid) {
+            mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON).content(request[0]))
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(request[1]));
+            org.assertj.core.api.Assertions.assertThat(games.count()).isZero();
+        }
+        int id = create("/videogame", "{\"videogameName\":\"Original\",\"platformId\":" + platform + "}");
+        String[][] patches = {
+                {"{\"platformId\":null,\"videogameName\":\"Changed\"}", "The videogame platform must be specified"},
+                {"{\"platformId\":999999}", "The specified platform does not exist"},
+                {"{\"isDigital\":1}", "The digital platform must be specified for digital videogames"},
+                {"{\"digitalPlatformId\":999999}", "The specified digital platform does not exist"}
+        };
+        for (String[] request : patches) {
+            mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON).content(request[0]))
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(request[1]));
+            mvc.perform(get("/videogame").param("name", "Original"))
+                    .andExpect(jsonPath("$[0].platform.id").value(platform))
+                    .andExpect(jsonPath("$[0].isDigital").value(false))
+                    .andExpect(jsonPath("$[0].digitalPlatform").doesNotExist());
+            org.assertj.core.api.Assertions.assertThat(games.count()).isEqualTo(1);
+        }
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isDigital\":1,\"digitalPlatformId\":" + store + "}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.platform.id").value(platform));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"digitalPlatformId\":null}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/videogame").param("name", "Original"))
+                .andExpect(jsonPath("$[0].isDigital").value(true))
+                .andExpect(jsonPath("$[0].digitalPlatform.id").value(store));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isDigital\":0,\"digitalPlatformId\":null}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.digitalPlatform").doesNotExist());
+    }
+
 }

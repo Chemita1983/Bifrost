@@ -1,6 +1,11 @@
 package com.bifrost.infrastructure.persistence.adapter;
 
 import com.bifrost.domain.Videogame;
+import com.bifrost.domain.Platform;
+import com.bifrost.domain.DigitalPlatform;
+import com.bifrost.infrastructure.persistence.entity.PlatformEntity;
+import org.springframework.web.server.ResponseStatusException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.bifrost.infrastructure.persistence.entity.VideogameEntity;
 import com.bifrost.infrastructure.mapper.PersistenceMapper;
 import com.bifrost.infrastructure.persistence.repository.DigitalPlatformJpa;
@@ -77,6 +82,8 @@ class VideogamePersistenceTest {
     @Test
     void shouldSaveVideogame() {
         Videogame videogame = new Videogame();
+        videogame.setPlatform(new Platform(1, null, null, null));
+        when(platformRepository.findById(1)).thenReturn(Optional.of(new PlatformEntity()));
         when(videogamesRepository.save(org.mockito.ArgumentMatchers.any(VideogameEntity.class)))
                 .thenReturn(new VideogameEntity());
 
@@ -85,6 +92,75 @@ class VideogamePersistenceTest {
         assertThat(result).isNotNull();
         verify(videogamesRepository).save(org.mockito.ArgumentMatchers.any(VideogameEntity.class));
     }
+    @Test
+    void saveRejectsMissingAndUnknownRelationsBeforeSaving() {
+        Videogame game = new Videogame();
+        assertBadRequest(() -> adapter.save(game), "The videogame platform must be specified");
+        game.setPlatform(new Platform(1, null, null, null));
+        game.setDigital(1);
+        assertBadRequest(() -> adapter.save(game), "The digital platform must be specified for digital videogames");
+        game.setDigital(0);
+        assertBadRequest(() -> adapter.save(game), "The specified platform does not exist");
+        when(platformRepository.findById(1)).thenReturn(Optional.of(new PlatformEntity()));
+        game.setDigitalPlatform(new DigitalPlatform(2, null, null));
+        assertBadRequest(() -> adapter.save(game), "The specified digital platform does not exist");
+        verify(videogamesRepository, never()).save(any());
+    }
+
+    @Test
+    void updateValidatesMergedStateBeforeChangingEntity() {
+        VideogameEntity entity = new VideogameEntity();
+        when(videogamesRepository.findById(1)).thenReturn(Optional.of(entity));
+        assertBadRequest(() -> adapter.update(1, game -> game), "The videogame platform must be specified");
+        assertThat(entity.getPlatformEntity()).isNull();
+        assertBadRequest(() -> adapter.update(1, game -> {
+            game.setPlatform(new Platform(2, null, null, null));
+            game.setDigital(1);
+            return game;
+        }), "The digital platform must be specified for digital videogames");
+        assertThat(entity.getPlatformEntity()).isNull();
+        assertBadRequest(() -> adapter.update(1, game -> {
+            game.setPlatform(new Platform(2, null, null, null));
+            return game;
+        }), "The specified platform does not exist");
+        when(platformRepository.findById(2)).thenReturn(Optional.of(new PlatformEntity()));
+        assertBadRequest(() -> adapter.update(1, game -> {
+            game.setPlatform(new Platform(2, null, null, null));
+            game.setDigitalPlatform(new DigitalPlatform(3, null, null));
+            return game;
+        }), "The specified digital platform does not exist");
+        assertThat(entity.getPlatformEntity()).isNull();
+        when(videogamesRepository.findById(404)).thenReturn(Optional.empty());
+        assertThat(adapter.update(404, game -> game)).isEmpty();
+    }
+
+    @Test
+    void updatePreservesAndResolvesExistingPlatform() {
+        PlatformEntity platform = new PlatformEntity();
+        platform.setId(7);
+        VideogameEntity entity = new VideogameEntity();
+        entity.setPlatformEntity(platform);
+        entity.setVideogameName("Original");
+        when(videogamesRepository.findById(1)).thenReturn(Optional.of(entity));
+        when(platformRepository.findById(7)).thenReturn(Optional.of(platform));
+
+        Videogame updated = adapter.update(1, game -> {
+            game.setName("Updated");
+            return game;
+        }).orElseThrow();
+
+        assertThat(updated.getName()).isEqualTo("Updated");
+        assertThat(updated.getPlatform().getId()).isEqualTo(7);
+        assertThat(entity.getPlatformEntity()).isSameAs(platform);
+    }
+
+    private void assertBadRequest(Runnable action, String message) {
+        assertThatThrownBy(action::run).isInstanceOfSatisfying(ResponseStatusException.class, ex -> {
+            assertThat(ex.getStatusCode().value()).isEqualTo(400);
+            assertThat(ex.getReason()).isEqualTo(message);
+        });
+    }
+
     @Test
     void deleteReturnsTrueWhenEntityExists() {
         VideogameEntity entity = new VideogameEntity();

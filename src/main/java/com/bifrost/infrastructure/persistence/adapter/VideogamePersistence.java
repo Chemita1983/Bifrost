@@ -55,16 +55,12 @@ public class VideogamePersistence implements VideogameRepositoryPort {
 
     @Override
     public Videogame save(Videogame videogame) {
+        validateRequiredRelations(videogame);
+        PlatformEntity platform = resolvePlatform(videogame);
+        DigitalPlatformEntity digitalPlatform = resolveDigitalPlatform(videogame);
         VideogameEntity entity = mapper.toEntity(videogame);
-        if (videogame.getPlatform() != null && videogame.getPlatform().getId() != null) {
-            PlatformEntity platform = platformRepository.getReferenceById(videogame.getPlatform().getId());
-            entity.setPlatformEntity(platform);
-        }
-        if (videogame.getDigitalPlatform() != null && videogame.getDigitalPlatform().getId() != null) {
-            DigitalPlatformEntity digitalPlatform =
-                    digitalPlatformJpa.getReferenceById(videogame.getDigitalPlatform().getId());
-            entity.setDigitalPlatformEntity(digitalPlatform);
-        }
+        entity.setPlatformEntity(platform);
+        entity.setDigitalPlatformEntity(digitalPlatform);
         VideogameEntity saved = videogamesRepository.save(entity);
         return mapper.toDomain(saved);
     }
@@ -73,18 +69,39 @@ public class VideogamePersistence implements VideogameRepositoryPort {
     public Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch) {
         return videogamesRepository.findById(id).map(entity -> {
             Videogame videogame = patch.apply(mapper.toDomain(entity));
-            PlatformEntity platform = videogame.getPlatform() == null ? null
-                    : entity.getPlatformEntity() != null && videogame.getPlatform().getId().equals(entity.getPlatformEntity().getId())
-                    ? entity.getPlatformEntity() : platformRepository.findById(videogame.getPlatform().getId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platform not found"));
-            DigitalPlatformEntity digitalPlatform = videogame.getDigitalPlatform() == null ? null
-                    : entity.getDigitalPlatformEntity() != null && videogame.getDigitalPlatform().getId().equals(entity.getDigitalPlatformEntity().getId())
-                    ? entity.getDigitalPlatformEntity() : digitalPlatformJpa.findById(videogame.getDigitalPlatform().getId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Digital platform not found"));
+            validateRequiredRelations(videogame);
+            PlatformEntity platform = resolvePlatform(videogame);
+            DigitalPlatformEntity digitalPlatform = resolveDigitalPlatform(videogame);
             mapper.updateEntity(videogame, entity, platform, digitalPlatform);
             return mapper.toDomain(entity);
         });
     }
+    private void validateRequiredRelations(Videogame videogame) {
+        if (videogame.getPlatform() == null || videogame.getPlatform().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The videogame platform must be specified");
+        }
+        if (videogame.getDigital() == 1 && (videogame.getDigitalPlatform() == null
+                || videogame.getDigitalPlatform().getId() == null)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The digital platform must be specified for digital videogames");
+        }
+    }
+
+    private PlatformEntity resolvePlatform(Videogame videogame) {
+        return platformRepository.findById(videogame.getPlatform().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The specified platform does not exist"));
+    }
+
+    private DigitalPlatformEntity resolveDigitalPlatform(Videogame videogame) {
+        if (videogame.getDigitalPlatform() == null) return null;
+        Integer id = videogame.getDigitalPlatform().getId();
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The specified digital platform does not exist");
+        }
+        return digitalPlatformJpa.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The specified digital platform does not exist"));
+    }
+
     @Override
     public boolean delete(Integer id) {
         return videogamesRepository.findById(id).map(entity -> {

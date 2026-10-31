@@ -143,20 +143,24 @@ returns matching physical, incomplete games. Incomplete means `isCompleted=0`;
 it does not imply the game has not been started. No matches return `[]`.
 Invalid filter values return HTTP 400. Results are not paginated.
 
+Creating a video game requires an existing `platformId`. A digital game also
+requires an existing `digitalPlatformId`; a physical game may omit it. These
+requirements also apply to the resulting game after a PATCH.
+
 Existing records can be partially updated with `PATCH /videogame/{id}`,
 `PATCH /platform/{id}`, and `PATCH /digital-platform/{id}`, using the same
-field names as POST. Omitted fields are preserved. An unknown record or related
-platform ID returns 404; PATCH never creates a record.
+field names as POST. Omitted fields are preserved. An unknown record returns
+404; an invalid related platform or digital store ID returns 400. PATCH never
+creates a record.
 
-`platformId` and `digitalPlatformId` may be explicitly `null`, which clears the
-relationship. Optional `hoursPlayed` is a non-negative 32-bit integer; `null`
+The platform cannot be cleared. `digitalPlatformId` may be explicitly `null`
+for a physical game, which clears the relationship. Optional `hoursPlayed` is a non-negative 32-bit integer; `null`
 means unknown, while `0` is a known value. On PATCH, omitting it preserves the
 current value and explicit `null` clears it. On POST, omission or `null` means
 unknown. Responses omit `hoursPlayed` when unknown, consistent with other null
 response fields. Other PATCH fields reject null. Text values must be strings,
 status fields must be integers 0 or 1, and `multiplayer` must be a boolean.
 Unknown fields and invalid types are rejected with 400 before modifying data.
-Existing POST fields remain unchanged.
 
 For an existing schema with the legacy `players` column, review the one-time
 script at `database/migrations/20261031_hours_and_sequences.sql`. It removes

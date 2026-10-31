@@ -1,8 +1,13 @@
 # Changelog
 
+
 All notable changes to Bifröst will be documented in this file.
 
 ## [Unreleased]
+
+### Fixed
+
+- Return HTTP 400 for invalid path or query parameter types instead of HTTP 500.
 
 ### Added
 
@@ -18,6 +23,9 @@ All notable changes to Bifröst will be documented in this file.
 - DELETE endpoints for video games, platforms, and digital stores; associated platforms and stores cannot be deleted.
 
 ### Changed
+
+- Return a generic message for unexpected server errors while preserving Spring HTTP error statuses and headers.
+- Require existing videogame platforms and digital platforms for digital games on create and merged updates; reject invalid relations with HTTP 400.
 
 - The Spring Boot test uses a disposable database with `create-drop` rather than
   the application's configured datasource; Docker is required for the full suite.
