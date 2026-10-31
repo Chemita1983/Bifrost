@@ -20,13 +20,15 @@ public record VideogameUpdateRequest(
         Objects.requireNonNull(videogameType, "videogameType is required");
         Objects.requireNonNull(videogameYear, "videogameYear is required");
         Objects.requireNonNull(companyName, "companyName is required");
-        Objects.requireNonNull(isDigital, "isDigital is required");
-        if (isDigital != 0 && isDigital != 1) throw new IllegalArgumentException("isDigital must be 0 or 1");
-        Objects.requireNonNull(isCompleted, "isCompleted is required");
-        if (isCompleted != 0 && isCompleted != 1) throw new IllegalArgumentException("isCompleted must be 0 or 1");
-        Objects.requireNonNull(isPlatinum, "isPlatinum is required");
-        if (isPlatinum != 0 && isPlatinum != 1) throw new IllegalArgumentException("isPlatinum must be 0 or 1");
+        requireBinary(isDigital, "isDigital");
+        requireBinary(isCompleted, "isCompleted");
+        requireBinary(isPlatinum, "isPlatinum");
         Objects.requireNonNull(multiplayer, "multiplayer is required");
+    }
+
+    private static void requireBinary(Integer value, String name) {
+        Objects.requireNonNull(value, name + " is required");
+        if (value != 0 && value != 1) throw new IllegalArgumentException(name + " must be 0 or 1");
     }
 
     public VideogameRequest toRequest() {

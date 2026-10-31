@@ -175,4 +175,33 @@ class UpdateEndpointsTest {
         verifyNoInteractions(games, platforms, stores);
     }
 
+    @Test
+    void putRejectsNullAndWrongTypesForPlatformAndStore() throws Exception {
+        for (String body : new String[]{
+                "{\"platformName\":null,\"platformCompany\":\"Nintendo\",\"platformYear\":\"2017\"}",
+                "{\"platformName\":\"Switch\",\"platformCompany\":true,\"platformYear\":\"2017\"}"}) {
+            mvc.perform(put("/platform/1").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest());
+        }
+        for (String body : new String[]{
+                "{\"digitalPlatformName\":\"Steam\",\"digitalPlatformCompany\":null}",
+                "{\"digitalPlatformName\":123,\"digitalPlatformCompany\":\"Valve\"}"}) {
+            mvc.perform(put("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(platforms, stores, games);
+    }
+
+    @Test
+    void postStillAcceptsPartialPlatformAndStore() throws Exception {
+        when(platforms.save(any(PlatformEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stores.save(any(DigitalPlatformEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}"))
+                .andExpect(status().isOk());
+        verify(platforms).save(any(PlatformEntity.class));
+        verify(stores).save(any(DigitalPlatformEntity.class));
+    }
+
 }
