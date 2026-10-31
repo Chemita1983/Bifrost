@@ -6,6 +6,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- MariaDB 11.4 Testcontainers integration tests covering API operations, filters,
+  hours played and foreign-key constraints using disposable data.
 - Optional nullable `hoursPlayed` for video games, validated as a non-negative integer and preserved when omitted from PATCH.
 - One-time MariaDB migration to remove the legacy `players` column and align identifier sequences with existing data.
 - Combinable platform, digital, completion, multiplayer, and partial case-insensitive type filters for `GET /videogames`.
@@ -17,6 +19,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Changed
 
+- The Spring Boot test uses a disposable database with `create-drop` rather than
+  the application's configured datasource; Docker is required for the full suite.
 - Platform and digital store identifiers are included in API responses to support updates.
 
 ## [0.3.0-SNAPSHOT] - 2026-10-24
