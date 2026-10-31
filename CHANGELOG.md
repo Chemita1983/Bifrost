@@ -7,7 +7,7 @@ All notable changes to Bifröst will be documented in this file.
 ### Added
 
 - Jakarta Bean Validation for create requests and supplied PATCH fields, with centralized API error responses.
-- Fixed the API locale to English for validation messages.
+- Set English as the default locale for validation messages.
 - PATCH endpoints for partially updating video games, platforms, and digital stores.
 - Validation of update fields and unit tests for the controllers.
 - DELETE endpoints for video games, platforms, and digital stores; associated platforms and stores cannot be deleted.

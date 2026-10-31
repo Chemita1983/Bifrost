@@ -1,7 +1,6 @@
 spring:
   web:
     locale: en
-    locale-resolver: fixed
   datasource:
     url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:bifrost}
     username: ${DB_USER:bifrost}
