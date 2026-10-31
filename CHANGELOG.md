@@ -20,6 +20,7 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Changed
 
+- Return a generic message for unexpected server errors while preserving Spring HTTP error statuses and headers.
 - Require existing videogame platforms and digital platforms for digital games on create and merged updates; reject invalid relations with HTTP 400.
 
 - The Spring Boot test uses a disposable database with `create-drop` rather than
