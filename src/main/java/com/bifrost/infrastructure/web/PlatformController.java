@@ -7,9 +7,12 @@ import java.util.Map;
 import com.bifrost.infrastructure.web.dto.PlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,5 +55,16 @@ public class PlatformController {
                 PatchRequest.merge(body, webMapper.toRequest(current), PlatformRequest.class)))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    @DeleteMapping(PATH + "/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePlatform(@PathVariable("id") Integer id) {
+        try {
+            if (!platformUseCase.delete(id)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Platform not found");
+            }
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Resource is in use", ex);
+        }
     }
 }

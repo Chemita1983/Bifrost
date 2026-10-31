@@ -12,4 +12,5 @@ public interface DigitalPlatformRepositoryPort {
 
     DigitalPlatform save(DigitalPlatform digitalPlatform);
     Optional<DigitalPlatform> update(Integer id, UnaryOperator<DigitalPlatform> patch);
+    boolean delete(Integer id);
 }

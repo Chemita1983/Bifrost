@@ -102,4 +102,19 @@ class DigitalPlatformControllerTest {
                         .isEqualTo(HttpStatus.NOT_FOUND));
         verify(digitalPlatformUseCase).update(eq(1), any());
     }
+    @Test
+    void deleteHandlesExistingAndMissingId() {
+        when(digitalPlatformUseCase.delete(1)).thenReturn(true, false);
+        controller.deleteDigitalPlatform(1);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deleteDigitalPlatform(1))
+                .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND));
+    }
+    @Test
+    void deleteTranslatesIntegrityConflict() {
+        when(digitalPlatformUseCase.delete(1)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("constraint"));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deleteDigitalPlatform(1))
+                .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.CONFLICT));
+    }
 }

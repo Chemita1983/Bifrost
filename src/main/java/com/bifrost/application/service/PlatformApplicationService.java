@@ -41,4 +41,9 @@ public class PlatformApplicationService implements PlatformUseCase {
     public Optional<Platform> update(Integer id, UnaryOperator<Platform> patch) {
         return platformRepository.update(id, patch);
     }
+    @Override
+    @Transactional
+    public boolean delete(Integer id) {
+        return platformRepository.delete(id);
+    }
 }

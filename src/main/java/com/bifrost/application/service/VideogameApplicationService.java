@@ -41,4 +41,9 @@ public class VideogameApplicationService implements VideogameUseCase {
     public Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch) {
         return videogameRepository.update(id, patch);
     }
+    @Override
+    @Transactional
+    public boolean delete(Integer id) {
+        return videogameRepository.delete(id);
+    }
 }

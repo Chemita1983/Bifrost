@@ -60,4 +60,11 @@ class VideogameApplicationServiceTest {
         assertThat(result).isSameAs(videogame);
         verify(videogameRepository).save(videogame);
     }
+    @Test
+    void deleteDelegatesAndReturnsRepositoryResult() {
+        when(videogameRepository.delete(1)).thenReturn(true, false);
+        assertThat(service.delete(1)).isTrue();
+        assertThat(service.delete(1)).isFalse();
+        org.mockito.Mockito.verify(videogameRepository, org.mockito.Mockito.times(2)).delete(1);
+    }
 }

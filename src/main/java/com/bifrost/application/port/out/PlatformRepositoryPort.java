@@ -14,4 +14,5 @@ public interface PlatformRepositoryPort {
 
     Platform save(Platform platform);
     Optional<Platform> update(Integer id, UnaryOperator<Platform> patch);
+    boolean delete(Integer id);
 }

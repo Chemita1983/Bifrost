@@ -14,4 +14,5 @@ public interface VideogameRepositoryPort {
 
     Videogame save(Videogame videogame);
     Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
+    boolean delete(Integer id);
 }
