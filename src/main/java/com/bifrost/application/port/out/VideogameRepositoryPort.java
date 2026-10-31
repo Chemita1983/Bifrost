@@ -10,6 +10,8 @@ public interface VideogameRepositoryPort {
 
     List<Videogame> findAll();
 
+    List<Videogame> findFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type);
+
     List<Videogame> findByNameContaining(String name);
 
     Videogame save(Videogame videogame);

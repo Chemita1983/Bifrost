@@ -10,6 +10,8 @@ public interface VideogameUseCase {
 
     List<Videogame> getAll();
 
+    List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type);
+
     List<Videogame> getByName(String name);
 
     Videogame create(Videogame videogame);

@@ -54,6 +54,16 @@ class VideogamePersistenceTest {
     }
 
     @Test
+    void filteredSearchConvertsFlagsAndMapsMockedRepositoryResults() {
+        when(videogamesRepository.findFiltered(5, 0, 1, false, "Shooter"))
+                .thenReturn(List.of(new VideogameEntity()));
+        assertThat(adapter.findFiltered(5, false, true, false, "Shooter")).hasSize(1);
+        verify(videogamesRepository).findFiltered(5, 0, 1, false, "Shooter");
+        assertThat(adapter.findFiltered(null, null, null, null, "rpg")).isEmpty();
+        verify(videogamesRepository).findFiltered(null, null, null, null, "rpg");
+    }
+
+    @Test
     void shouldFindVideogamesByName() {
         when(videogamesRepository.findByVideogameNameContaining("mario"))
                 .thenReturn(List.of(new VideogameEntity()));

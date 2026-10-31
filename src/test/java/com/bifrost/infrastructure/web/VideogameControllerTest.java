@@ -43,10 +43,24 @@ class VideogameControllerTest {
     void shouldGetAllVideogames() {
         when(videogameUseCase.getAll()).thenReturn(List.of(new Videogame()));
 
-        List<VideogameResponse> result = controller.getVideogames();
+        List<VideogameResponse> result = controller.getVideogames(null, null, null, null, null);
 
         assertThat(result).hasSize(1);
         verify(videogameUseCase).getAll();
+    }
+
+    @Test
+    void filteredSearchParsesFalseAndDelegates() {
+        when(videogameUseCase.getFiltered(3, false, false, true, "RPG")).thenReturn(List.of(new Videogame()));
+        assertThat(controller.getVideogames("3", "false", "false", "true", "RPG")).hasSize(1);
+        verify(videogameUseCase).getFiltered(3, false, false, true, "RPG");
+    }
+
+    @Test
+    void rejectsNonPositivePlatformFilter() {
+        assertThatThrownBy(() -> controller.getVideogames("0", null, null, null, null))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
