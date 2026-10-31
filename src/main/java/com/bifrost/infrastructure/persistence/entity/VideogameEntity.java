@@ -42,4 +42,6 @@ public class VideogameEntity extends BifrostEntity {
 
     private boolean multiplayer;
 
+    private Integer hoursPlayed;
+
 }

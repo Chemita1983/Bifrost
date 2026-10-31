@@ -54,11 +54,13 @@ public class PersistenceMapper {
         if (entity == null) {
             return null;
         }
-        return new Videogame(entity.getId(), entity.getVideogameName(), entity.getVideogameType(),
+        Videogame videogame = new Videogame(entity.getId(), entity.getVideogameName(), entity.getVideogameType(),
                 entity.getVideogameYear(), toDomain(entity.getPlatformEntity()),
                 toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(),
                 entity.getIsDigital(), entity.getIsCompleted(), entity.getIsPlatinum(),
                 entity.isMultiplayer());
+        videogame.setHoursPlayed(entity.getHoursPlayed());
+        return videogame;
     }
 
     public VideogameEntity toEntity(Videogame videogame) {
@@ -77,6 +79,7 @@ public class PersistenceMapper {
         entity.setIsCompleted(videogame.getCompleted());
         entity.setIsPlatinum(videogame.getPlatinum());
         entity.setMultiplayer(videogame.isMultiplayer());
+        entity.setHoursPlayed(videogame.getHoursPlayed());
         return entity;
     }
 
@@ -102,6 +105,7 @@ public class PersistenceMapper {
         target.setIsCompleted(source.getCompleted());
         target.setIsPlatinum(source.getPlatinum());
         target.setMultiplayer(source.isMultiplayer());
+        target.setHoursPlayed(source.getHoursPlayed());
         target.setPlatformEntity(platform);
         target.setDigitalPlatformEntity(digitalPlatform);
     }

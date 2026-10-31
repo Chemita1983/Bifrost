@@ -20,6 +20,24 @@ class PatchRequestTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
+    void hoursCanBePreservedSetToZeroOrClearedAndMustBeNonNegativeIntegers() {
+        var current = new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, 12);
+        assertThat(PatchRequest.merge(Map.of(), current).hoursPlayed()).isEqualTo(12);
+        PatchRequest.validateVideogame(Map.of("hoursPlayed", 0), validator);
+        assertThat(PatchRequest.merge(Map.of("hoursPlayed", 0), current).hoursPlayed()).isZero();
+        Map<String, Object> clear = new HashMap<>();
+        clear.put("hoursPlayed", null);
+        PatchRequest.validateVideogame(clear, validator);
+        assertThat(PatchRequest.merge(clear, current).hoursPlayed()).isNull();
+        for (Object invalid : List.of(-1, 1.5, "1", 2147483648L)) {
+            assertThatThrownBy(() -> PatchRequest.validateVideogame(Map.of("hoursPlayed", invalid), validator))
+                    .isInstanceOf(ResponseStatusException.class);
+        }
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, -1)))
+                .extracting(v -> v.getPropertyPath().toString()).contains("hoursPlayed");
+    }
+
+    @Test
     void platformPatchValidatesAndMergesOnlySuppliedFields() {
         PlatformRequest current = new PlatformRequest("Old", "Company", "2000");
         Map<String, Object> body = Map.of("platformName", "New", "platformYear", "2024");

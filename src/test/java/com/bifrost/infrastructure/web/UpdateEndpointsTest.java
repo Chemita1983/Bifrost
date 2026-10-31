@@ -33,6 +33,46 @@ class UpdateEndpointsTest {
     ).setControllerAdvice(new ApiExceptionHandler()).build();
 
     @Test
+    void hoursAreCreatedReadPreservedUpdatedAndCleared() throws Exception {
+        when(games.save(any(VideogameEntity.class))).thenAnswer(i -> i.getArgument(0));
+        for (String suffix : new String[] {"", ",\"hoursPlayed\":null", ",\"hoursPlayed\":0", ",\"hoursPlayed\":42"}) {
+            var result = mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"videogameName\":\"Game\"" + suffix + "}"))
+                    .andExpect(status().isOk());
+            if (suffix.endsWith(":0")) result.andExpect(jsonPath("$.hoursPlayed").value(0));
+            else if (suffix.endsWith(":42")) result.andExpect(jsonPath("$.hoursPlayed").value(42));
+            else result.andExpect(jsonPath("$.hoursPlayed").doesNotExist());
+        }
+        VideogameEntity game = new VideogameEntity();
+        game.setId(3); game.setVideogameName("Game"); game.setHoursPlayed(42);
+        when(games.findById(3)).thenReturn(Optional.of(game));
+        when(games.findAll()).thenReturn(List.of(game));
+        mvc.perform(get("/videogames")).andExpect(status().isOk()).andExpect(jsonPath("$[0].hoursPlayed").value(42));
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"New\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hoursPlayed").value(42));
+        assertThat(game.getHoursPlayed()).isEqualTo(42);
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content("{\"hoursPlayed\":0}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hoursPlayed").value(0));
+        assertThat(game.getHoursPlayed()).isZero();
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content("{\"hoursPlayed\":null}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.hoursPlayed").doesNotExist());
+        assertThat(game.getHoursPlayed()).isNull();
+    }
+
+    @Test
+    void rejectsInvalidHoursOnCreateAndPatchBeforePersistence() throws Exception {
+        for (String value : new String[] {"-1", "1.5", "\"1\"", "true", "2147483648"}) {
+            mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"videogameName\":\"Game\",\"hoursPlayed\":" + value + "}"))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"hoursPlayed\":" + value + "}"))
+                    .andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(games, platforms, stores);
+    }
+
+    @Test
     void videogameFiltersReachMockRepositoryAndReturnArray() throws Exception {
         VideogameEntity game = new VideogameEntity();
         game.setVideogameName("Example");

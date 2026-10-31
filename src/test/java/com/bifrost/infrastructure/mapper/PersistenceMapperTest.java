@@ -44,14 +44,29 @@ class PersistenceMapperTest {
         var source = new com.bifrost.domain.Videogame();
         source.setId(99);
         source.setName("Updated");
+        source.setHoursPlayed(0);
         mapper.updateEntity(source, target, platform, store);
         assertThat(target.getId()).isEqualTo(7);
         assertThat(target.getVideogameName()).isEqualTo("Updated");
+        assertThat(target.getHoursPlayed()).isZero();
         assertThat(target.getPlatformEntity()).isSameAs(platform);
         assertThat(target.getDigitalPlatformEntity()).isSameAs(store);
+        source.setHoursPlayed(null);
         mapper.updateEntity(source, target, null, null);
+        assertThat(target.getHoursPlayed()).isNull();
         assertThat(target.getPlatformEntity()).isNull();
         assertThat(target.getDigitalPlatformEntity()).isNull();
+    }
+
+    @Test
+    void mapsVideogameHoursInBothDirections() {
+        var entity = new com.bifrost.infrastructure.persistence.entity.VideogameEntity();
+        for (Integer hours : new Integer[] {null, 0, 42}) {
+            entity.setHoursPlayed(hours);
+            var domain = mapper.toDomain(entity);
+            assertThat(domain.getHoursPlayed()).isEqualTo(hours);
+            assertThat(mapper.toEntity(domain).getHoursPlayed()).isEqualTo(hours);
+        }
     }
 
 }

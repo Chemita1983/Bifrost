@@ -15,7 +15,8 @@ public record VideogameResponse(
         boolean isDigital,
         boolean isCompleted,
         boolean isPlatinum,
-        boolean multiplayer) {
+        boolean multiplayer,
+        Integer hoursPlayed) {
 
     public static VideogameResponse from(Videogame videogame) {
         return new VideogameResponse(videogame.getId(), videogame.getName(), videogame.getType(),
@@ -24,6 +25,6 @@ public record VideogameResponse(
                 videogame.getDigitalPlatform() == null ? null
                         : DigitalPlatformResponse.from(videogame.getDigitalPlatform()),
                 videogame.getCompanyName(), videogame.getDigital() == 1, videogame.getCompleted() == 1,
-                videogame.getPlatinum() == 1, videogame.isMultiplayer());
+                videogame.getPlatinum() == 1, videogame.isMultiplayer(), videogame.getHoursPlayed());
     }
 }
