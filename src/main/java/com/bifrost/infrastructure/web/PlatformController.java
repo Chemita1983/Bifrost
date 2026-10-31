@@ -54,9 +54,9 @@ public class PlatformController {
     @PatchMapping(value = PATH + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public PlatformResponse updatePlatform(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, PlatformRequest.class, validator);
+        PatchRequest.validatePlatform(body, validator);
         return platformUseCase.update(id, current -> webMapper.toDomain(
-                PatchRequest.merge(body, webMapper.toRequest(current), PlatformRequest.class)))
+                PatchRequest.merge(body, webMapper.toRequest(current))))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

@@ -20,13 +20,37 @@ class PatchRequestTest {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
+    void platformPatchValidatesAndMergesOnlySuppliedFields() {
+        PlatformRequest current = new PlatformRequest("Old", "Company", "2000");
+        Map<String, Object> body = Map.of("platformName", "New", "platformYear", "2024");
+        PatchRequest.validatePlatform(body, validator);
+        assertThat(PatchRequest.merge(body, current)).isEqualTo(new PlatformRequest("New", "Company", "2024"));
+        assertThatThrownBy(() -> PatchRequest.validatePlatform(Map.of("platformName", " "), validator))
+                .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> PatchRequest.validatePlatform(Map.of("unknown", "x"), validator))
+                .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @Test
+    void digitalPlatformPatchValidatesAndMergesOnlySuppliedFields() {
+        DigitalPlatformRequest current = new DigitalPlatformRequest("Old", "Company");
+        Map<String, Object> body = Map.of("digitalPlatformCompany", "New company");
+        PatchRequest.validateDigitalPlatform(body, validator);
+        assertThat(PatchRequest.merge(body, current)).isEqualTo(new DigitalPlatformRequest("Old", "New company"));
+        assertThatThrownBy(() -> PatchRequest.validateDigitalPlatform(Map.of("digitalPlatformName", " "), validator))
+                .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> PatchRequest.validateDigitalPlatform(Map.of("digitalPlatformCompany", false), validator))
+                .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @Test
     void validatesOnlySuppliedValuesAndAllowsClearingRelations() {
         Map<String, Object> body = new HashMap<>();
         body.put("platformId", null);
         body.put("isDigital", 0);
-        PatchRequest.validate(body, VideogameRequest.class, validator);
+        PatchRequest.validateVideogame(body, validator);
         VideogameRequest current = new VideogameRequest("Game", null, null, 2, null, null, 1, 0, 0, false);
-        VideogameRequest merged = PatchRequest.merge(body, current, VideogameRequest.class);
+        VideogameRequest merged = PatchRequest.merge(body, current);
         assertThat(merged.videogameName()).isEqualTo("Game");
         assertThat(merged.platformId()).isNull();
         assertThat(merged.isDigital()).isZero();
@@ -36,7 +60,7 @@ class PatchRequestTest {
     void rejectsInvalidSuppliedValues() {
         for (Map<String, Object> body : List.<Map<String, Object>>of(Map.of("videogameName", " "), Map.of("platformId", 0),
                 Map.of("isDigital", 2), Map.of("unknown", 1), Map.of("isDigital", "1"))) {
-            assertThatThrownBy(() -> PatchRequest.validate(body, VideogameRequest.class, validator))
+            assertThatThrownBy(() -> PatchRequest.validateVideogame(body, validator))
                     .isInstanceOf(ResponseStatusException.class);
         }
     }
@@ -51,7 +75,7 @@ class PatchRequestTest {
                 Map.entry(Map.<String, Object>of("isDigital", 1L), "isDigital"),
                 Map.entry(Map.<String, Object>of("unknown", 1), "unknown"),
                 Map.entry(Map.<String, Object>of("digitalPlatformId", 0), "digitalPlatformId"))) {
-            assertThatThrownBy(() -> PatchRequest.validate(example.getKey(), VideogameRequest.class, validator))
+            assertThatThrownBy(() -> PatchRequest.validateVideogame(example.getKey(), validator))
                     .isInstanceOfSatisfying(ResponseStatusException.class, exception -> {
                         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                         assertThat(exception.getReason()).isEqualTo("Invalid field: " + example.getValue());
@@ -63,19 +87,18 @@ class PatchRequestTest {
     void acceptsBoundaryValuesAndRejectsOutOfRangeValues() {
         for (String field : List.of("isDigital", "isCompleted", "isPlatinum")) {
             for (int value : List.of(0, 1)) {
-                PatchRequest.validate(Map.of(field, value), VideogameRequest.class, validator);
+                PatchRequest.validateVideogame(Map.of(field, value), validator);
             }
             for (int value : List.of(-1, 2)) {
-                assertThatThrownBy(() -> PatchRequest.validate(Map.of(field, value), VideogameRequest.class, validator))
+                assertThatThrownBy(() -> PatchRequest.validateVideogame(Map.of(field, value), validator))
                         .isInstanceOf(ResponseStatusException.class);
             }
         }
-        PatchRequest.validate(Map.of("platformId", 1, "digitalPlatformId", 1, "multiplayer", false),
-                VideogameRequest.class, validator);
+        PatchRequest.validateVideogame(Map.of("platformId", 1, "digitalPlatformId", 1, "multiplayer", false), validator);
         Map<String, Object> relations = new HashMap<>();
         relations.put("platformId", null);
         relations.put("digitalPlatformId", null);
-        PatchRequest.validate(relations, VideogameRequest.class, validator);
+        PatchRequest.validateVideogame(relations, validator);
     }
 
     @Test

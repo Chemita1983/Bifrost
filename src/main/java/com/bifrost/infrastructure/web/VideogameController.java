@@ -58,9 +58,9 @@ public class VideogameController {
     @PatchMapping(value = PATH_VIDEOGAME + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public VideogameResponse updateVideogame(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, VideogameRequest.class, validator);
+        PatchRequest.validateVideogame(body, validator);
         return videogameUseCase.update(id, current -> webMapper.toDomain(
-                PatchRequest.merge(body, webMapper.toRequest(current), VideogameRequest.class)))
+                PatchRequest.merge(body, webMapper.toRequest(current))))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

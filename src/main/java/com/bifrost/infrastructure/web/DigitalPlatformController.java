@@ -52,9 +52,9 @@ public class DigitalPlatformController {
     @PatchMapping(value = PATH + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DigitalPlatformResponse updateDigitalPlatform(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, DigitalPlatformRequest.class, validator);
+        PatchRequest.validateDigitalPlatform(body, validator);
         return digitalPlatformUseCase.update(id, current -> webMapper.toDomain(
-                PatchRequest.merge(body, webMapper.toRequest(current), DigitalPlatformRequest.class)))
+                PatchRequest.merge(body, webMapper.toRequest(current))))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
