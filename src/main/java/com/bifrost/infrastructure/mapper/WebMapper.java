@@ -14,6 +14,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebMapper {
 
+    public PlatformRequest toRequest(Platform platform) {
+        return new PlatformRequest(platform.getName(), platform.getCompany(), platform.getYear());
+    }
+
+    public DigitalPlatformRequest toRequest(DigitalPlatform platform) {
+        return new DigitalPlatformRequest(platform.getName(), platform.getCompany());
+    }
+
+    public VideogameRequest toRequest(Videogame game) {
+        return new VideogameRequest(game.getName(), game.getType(), game.getYear(),
+                game.getPlatform() == null ? null : game.getPlatform().getId(),
+                game.getDigitalPlatform() == null ? null : game.getDigitalPlatform().getId(),
+                game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(), game.isMultiplayer());
+    }
+
     public Platform toDomain(PlatformRequest request) {
         return new Platform(null, request.platformName(), request.platformCompany(), request.platformYear());
     }

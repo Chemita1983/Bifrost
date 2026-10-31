@@ -4,6 +4,7 @@ import com.bifrost.domain.Platform;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public interface PlatformRepositoryPort {
 
@@ -12,5 +13,5 @@ public interface PlatformRepositoryPort {
     List<Platform> findByNameContaining(String name);
 
     Platform save(Platform platform);
-    Optional<Platform> update(Integer id, Platform platform);
+    Optional<Platform> update(Integer id, UnaryOperator<Platform> patch);
 }

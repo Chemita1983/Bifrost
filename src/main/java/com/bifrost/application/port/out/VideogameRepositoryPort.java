@@ -4,6 +4,7 @@ import com.bifrost.domain.Videogame;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public interface VideogameRepositoryPort {
 
@@ -12,5 +13,5 @@ public interface VideogameRepositoryPort {
     List<Videogame> findByNameContaining(String name);
 
     Videogame save(Videogame videogame);
-    Optional<Videogame> update(Integer id, Videogame videogame);
+    Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
 }

@@ -3,14 +3,14 @@ package com.bifrost.infrastructure.web;
 import com.bifrost.application.port.in.VideogameUseCase;
 import com.bifrost.domain.Videogame;
 import com.bifrost.infrastructure.web.dto.VideogameRequest;
-import com.bifrost.infrastructure.web.dto.VideogameUpdateRequest;
+import java.util.Map;
 import com.bifrost.infrastructure.web.dto.VideogameResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,10 +49,12 @@ public class VideogameController {
         Videogame videogame = webMapper.toDomain(request);
         return webMapper.toResponse(videogameUseCase.create(videogame));
 	}
-    @PutMapping(value = PATH_VIDEOGAME + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PatchMapping(value = PATH_VIDEOGAME + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public VideogameResponse updateVideogame(@PathVariable("id") Integer id, @RequestBody VideogameUpdateRequest request) {
-        return videogameUseCase.update(id, webMapper.toDomain(request.toRequest()))
+    public VideogameResponse updateVideogame(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
+        PatchRequest.validate(body, VideogameRequest.class);
+        return videogameUseCase.update(id, current -> webMapper.toDomain(
+                PatchRequest.merge(body, webMapper.toRequest(current), VideogameRequest.class)))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @Repository
 public class PlatformPersistence implements PlatformRepositoryPort {
@@ -38,8 +39,9 @@ public class PlatformPersistence implements PlatformRepositoryPort {
         return mapper.toDomain(saved);
     }
     @Override
-    public Optional<Platform> update(Integer id, Platform platform) {
+    public Optional<Platform> update(Integer id, UnaryOperator<Platform> patch) {
         return platformRepository.findById(id).map(entity -> {
+            Platform platform = patch.apply(mapper.toDomain(entity));
             mapper.updateEntity(platform, entity);
             return mapper.toDomain(entity);
         });

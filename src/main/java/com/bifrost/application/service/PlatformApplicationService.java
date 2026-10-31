@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @Service
 public class PlatformApplicationService implements PlatformUseCase {
@@ -37,7 +38,7 @@ public class PlatformApplicationService implements PlatformUseCase {
     }
     @Override
     @Transactional
-    public Optional<Platform> update(Integer id, Platform platform) {
-        return platformRepository.update(id, platform);
+    public Optional<Platform> update(Integer id, UnaryOperator<Platform> patch) {
+        return platformRepository.update(id, patch);
     }
 }

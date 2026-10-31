@@ -1,14 +1,11 @@
 package com.bifrost.infrastructure.web;
 
 import com.bifrost.application.service.*;
-import com.bifrost.infrastructure.mapper.PersistenceMapper;
-import com.bifrost.infrastructure.mapper.WebMapper;
+import com.bifrost.infrastructure.mapper.*;
 import com.bifrost.infrastructure.persistence.adapter.*;
 import com.bifrost.infrastructure.persistence.entity.*;
 import com.bifrost.infrastructure.persistence.repository.*;
 import org.junit.jupiter.api.Test;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,8 +15,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class UpdateEndpointsTest {
@@ -35,173 +31,93 @@ class UpdateEndpointsTest {
     ).build();
 
     @Test
-    void platformUpdatesExistingEntityAndReturns404ForMissingId() throws Exception {
-        PlatformEntity entity = new PlatformEntity();
-        entity.setId(1);
-        when(platforms.findById(1)).thenReturn(Optional.of(entity));
-        String body = "{\"platformName\":\"Switch\",\"platformCompany\":\"Nintendo\",\"platformYear\":\"2017\"}";
-        mvc.perform(put("/platform/1").contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.platformName").value("Switch"))
-                .andExpect(jsonPath("$.id").doesNotExist());
-        assertThat(entity.getPlatformCompany()).isEqualTo("Nintendo");
-        assertThat(entity.getPlatformYear()).isEqualTo("2017");
-        mvc.perform(put("/platform/99").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNotFound());
-        verify(platforms, never()).save(any());
+    void patchesPlatformAndStoreWithoutChangingOmittedFields() throws Exception {
+        PlatformEntity platform = new PlatformEntity(); platform.setId(1); platform.setPlatformName("Old");
+        platform.setPlatformCompany("Nintendo"); platform.setPlatformYear("2017");
+        DigitalPlatformEntity store = new DigitalPlatformEntity(); store.setId(2);
+        store.setDigitalPlatformName("Old store"); store.setDigitalPlatformCompany("Valve");
+        when(platforms.findById(1)).thenReturn(Optional.of(platform));
+        when(stores.findById(2)).thenReturn(Optional.of(store));
+        mvc.perform(patch("/platform/1").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.platformCompany").value("Nintendo"));
+        mvc.perform(patch("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.digitalPlatformCompany").value("Valve"));
+        assertThat(platform.getPlatformName()).isEqualTo("Switch");
+        assertThat(platform.getPlatformYear()).isEqualTo("2017");
+        assertThat(store.getDigitalPlatformName()).isEqualTo("Steam");
+        verify(platforms).findById(1); verify(stores).findById(2);
     }
 
     @Test
-    void storeUpdatesExistingEntityAndReturns404ForMissingId() throws Exception {
-        DigitalPlatformEntity entity = new DigitalPlatformEntity();
-        entity.setId(2);
-        when(stores.findById(2)).thenReturn(Optional.of(entity));
-        String body = "{\"digitalPlatformName\":\"Steam\",\"digitalPlatformCompany\":\"Valve\"}";
-        mvc.perform(put("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.digitalPlatformName").value("Steam"))
-                .andExpect(jsonPath("$.id").doesNotExist());
-        assertThat(entity.getDigitalPlatformCompany()).isEqualTo("Valve");
-        mvc.perform(put("/digital-platform/99").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNotFound());
-        verify(stores, never()).save(any());
+    void patchPreservesOmittedRelationsAndAcceptsFalseAndZeroThenClearsExplicitNull() throws Exception {
+        VideogameEntity game = new VideogameEntity(); game.setId(3); game.setVideogameName("Original");
+        game.setIsDigital(1); game.setIsCompleted(1); game.setIsPlatinum(1); game.setMultiplayer(true);
+        PlatformEntity platform = new PlatformEntity(); platform.setId(4);
+        DigitalPlatformEntity store = new DigitalPlatformEntity(); store.setId(5);
+        game.setPlatformEntity(platform); game.setDigitalPlatformEntity(store);
+        when(games.findById(3)).thenReturn(Optional.of(game));
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"isDigital\":0,\"isCompleted\":0,\"isPlatinum\":0,\"multiplayer\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.videogameName").value("Original"));
+        assertThat(game.getIsDigital()).isZero(); assertThat(game.getIsCompleted()).isZero();
+        assertThat(game.getIsPlatinum()).isZero(); assertThat(game.isMultiplayer()).isFalse();
+        assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"platformId\":null,\"digitalPlatformId\":null}")) .andExpect(status().isOk());
+        assertThat(game.getPlatformEntity()).isNull(); assertThat(game.getDigitalPlatformEntity()).isNull();
+        assertThat(game.getVideogameName()).isEqualTo("Original");
+        verifyNoInteractions(platforms, stores);
     }
 
     @Test
-    void videogameUpdatesFieldsAndRelationsAndReturns404ForMissingId() throws Exception {
-        VideogameEntity entity = new VideogameEntity();
-        entity.setId(3);
+    void changedRelationsAreResolvedAndMissingRelationsDoNotMutateGame() throws Exception {
+        VideogameEntity game = new VideogameEntity(); game.setId(3); game.setVideogameName("Original");
         PlatformEntity platform = new PlatformEntity(); platform.setId(4); platform.setPlatformName("PC");
         DigitalPlatformEntity store = new DigitalPlatformEntity(); store.setId(5); store.setDigitalPlatformName("Steam");
-        when(games.findById(3)).thenReturn(Optional.of(entity));
-        when(platforms.getReferenceById(4)).thenReturn(platform);
-        when(stores.getReferenceById(5)).thenReturn(store);
-        String body = "{\"videogameName\":\"Game\",\"videogameType\":\"RPG\",\"videogameYear\":\"2024\",\"platformId\":4,\"digitalPlatformId\":5,\"companyName\":\"Studio\",\"isDigital\":1,\"isCompleted\":1,\"isPlatinum\":1,\"multiplayer\":true}";
-        mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(3))
-                .andExpect(jsonPath("$.platform.platformName").value("PC"))
-                .andExpect(jsonPath("$.digitalPlatform.digitalPlatformName").value("Steam"));
-        assertThat(entity.getVideogameType()).isEqualTo("RPG");
-        assertThat(entity.getVideogameYear()).isEqualTo("2024");
-        assertThat(entity.getCompanyName()).isEqualTo("Studio");
-        assertThat(entity.getIsDigital()).isEqualTo(1);
-        assertThat(entity.getIsCompleted()).isEqualTo(1);
-        assertThat(entity.getIsPlatinum()).isEqualTo(1);
-        assertThat(entity.isMultiplayer()).isTrue();
-        assertThat(entity.getPlatformEntity()).isSameAs(platform);
-        assertThat(entity.getDigitalPlatformEntity()).isSameAs(store);
-        mvc.perform(put("/videogame/99").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNotFound());
-        verify(games, never()).save(any());
-        mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON)
-                .content(body.replace("\"platformId\":4", "\"platformId\":null")
-                        .replace("\"digitalPlatformId\":5", "\"digitalPlatformId\":null")))
-                .andExpect(status().isOk());
-        assertThat(entity.getPlatformEntity()).isNull();
-        assertThat(entity.getDigitalPlatformEntity()).isNull();
+        when(games.findById(3)).thenReturn(Optional.of(game));
+        when(platforms.findById(4)).thenReturn(Optional.of(platform)); when(stores.findById(5)).thenReturn(Optional.of(store));
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"platformId\":4,\"digitalPlatformId\":5}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.platform.platformName").value("PC"));
+        assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"videogameName\":\"Changed\",\"platformId\":99}")) .andExpect(status().isNotFound());
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"videogameName\":\"Changed\",\"digitalPlatformId\":99}")) .andExpect(status().isNotFound());
+        assertThat(game.getVideogameName()).isEqualTo("Original");
+        assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
     }
 
     @Test
-    void incompleteVideogameNeverTouchesPersistence() throws Exception {
-        VideogameEntity existing = new VideogameEntity();
-        existing.setVideogameName("Original");
-        existing.setIsDigital(1);
-        existing.setMultiplayer(true);
-        PlatformEntity platform = new PlatformEntity();
-        DigitalPlatformEntity store = new DigitalPlatformEntity();
-        existing.setPlatformEntity(platform);
-        existing.setDigitalPlatformEntity(store);
-        ObjectMapper mapper = new ObjectMapper();
-        String complete = "{\"videogameName\":\"Game\",\"videogameType\":\"RPG\",\"videogameYear\":\"2024\",\"platformId\":4,\"digitalPlatformId\":5,\"companyName\":\"Studio\",\"isDigital\":1,\"isCompleted\":1,\"isPlatinum\":1,\"multiplayer\":true}";
-        for (String field : new String[]{"videogameName", "videogameType", "videogameYear", "platformId",
-                "digitalPlatformId", "companyName", "isDigital", "isCompleted", "isPlatinum", "multiplayer"}) {
-            ObjectNode body = (ObjectNode) mapper.readTree(complete);
-            body.remove(field);
-            mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(body.toString()))
-                    .andExpect(status().isBadRequest());
+    void nonexistentIdsReturn404AndPutIsNotSupported() throws Exception {
+        for (String path : new String[]{"/videogame/99", "/platform/99", "/digital-platform/99"}) {
+            mvc.perform(patch(path).contentType(MediaType.APPLICATION_JSON).content("{}")) .andExpect(status().isNotFound());
+            mvc.perform(put(path).contentType(MediaType.APPLICATION_JSON).content("{}")) .andExpect(status().isMethodNotAllowed());
         }
-        ObjectNode nullFlag = (ObjectNode) mapper.readTree(complete);
-        nullFlag.putNull("isDigital");
-        mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(nullFlag.toString()))
-                .andExpect(status().isBadRequest());
-        mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"Other\"}"))
-                .andExpect(status().isBadRequest());
-        verifyNoInteractions(games, platforms, stores);
-        assertThat(existing.getVideogameName()).isEqualTo("Original");
-        assertThat(existing.getIsDigital()).isEqualTo(1);
-        assertThat(existing.isMultiplayer()).isTrue();
-        assertThat(existing.getPlatformEntity()).isSameAs(platform);
-        assertThat(existing.getDigitalPlatformEntity()).isSameAs(store);
     }
 
     @Test
-    void incompletePlatformAndStoreNeverTouchPersistence() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        String platformBody = "{\"platformName\":\"Switch\",\"platformCompany\":\"Nintendo\",\"platformYear\":\"2017\"}";
-        for (String field : new String[]{"platformName", "platformCompany", "platformYear"}) {
-            ObjectNode body = (ObjectNode) mapper.readTree(platformBody);
-            body.remove(field);
-            mvc.perform(put("/platform/1").contentType(MediaType.APPLICATION_JSON).content(body.toString()))
-                    .andExpect(status().isBadRequest());
+    void invalidValuesAreRejectedBeforePersistence() throws Exception {
+        for (String body : new String[]{"{\"platformId\":\"4\"}", "{\"platformId\":4.5}",
+                "{\"platformId\":2147483648}", "{\"isDigital\":2}", "{\"isCompleted\":-1}",
+                "{\"isPlatinum\":true}", "{\"multiplayer\":1}", "{\"videogameName\":null}",
+                "{\"videogameYear\":2024}", "{\"unknown\":1}", "[]", "null"}) {
+            mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
         }
-        String storeBody = "{\"digitalPlatformName\":\"Steam\",\"digitalPlatformCompany\":\"Valve\"}";
-        for (String field : new String[]{"digitalPlatformName", "digitalPlatformCompany"}) {
-            ObjectNode body = (ObjectNode) mapper.readTree(storeBody);
-            body.remove(field);
-            mvc.perform(put("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body.toString()))
-                    .andExpect(status().isBadRequest());
-        }
-        verifyNoInteractions(platforms, stores, games);
-    }
-
-    @Test
-    void postStillAcceptsPartialVideogame() throws Exception {
-        when(games.save(any(VideogameEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"videogameName\":\"Game\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.videogameName").value("Game"));
-        verify(games).save(any(VideogameEntity.class));
-    }
-    @Test
-    void putRejectsCoercionsOutOfRangeFlagsAndNullRequiredValues() throws Exception {
-        String complete = "{\"videogameName\":\"Game\",\"videogameType\":\"RPG\",\"videogameYear\":\"2024\",\"platformId\":4,\"digitalPlatformId\":5,\"companyName\":\"Studio\",\"isDigital\":1,\"isCompleted\":0,\"isPlatinum\":1,\"multiplayer\":true}";
-        for (String invalid : new String[]{
-                complete.replace("\"platformId\":4", "\"platformId\":\"4\""),
-                complete.replace("\"platformId\":4", "\"platformId\":4.5"),
-                complete.replace("\"isDigital\":1", "\"isDigital\":2"),
-                complete.replace("\"isCompleted\":0", "\"isCompleted\":-1"),
-                complete.replace("\"isPlatinum\":1", "\"isPlatinum\":true"),
-                complete.replace("\"multiplayer\":true", "\"multiplayer\":1"),
-                complete.replace("\"videogameName\":\"Game\"", "\"videogameName\":null"),
-                complete.replace("\"videogameYear\":\"2024\"", "\"videogameYear\":2024")}) {
-            mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(invalid))
-                    .andExpect(status().isBadRequest());
-        }
+        for (String body : new String[]{"{\"platformName\":null}", "{\"platformCompany\":true}"})
+            mvc.perform(patch("/platform/1").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
+        for (String body : new String[]{"{\"digitalPlatformCompany\":null}", "{\"digitalPlatformName\":123}"})
+            mvc.perform(patch("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
         verifyNoInteractions(games, platforms, stores);
     }
 
     @Test
-    void putRejectsNullAndWrongTypesForPlatformAndStore() throws Exception {
-        for (String body : new String[]{
-                "{\"platformName\":null,\"platformCompany\":\"Nintendo\",\"platformYear\":\"2017\"}",
-                "{\"platformName\":\"Switch\",\"platformCompany\":true,\"platformYear\":\"2017\"}"}) {
-            mvc.perform(put("/platform/1").contentType(MediaType.APPLICATION_JSON).content(body))
-                    .andExpect(status().isBadRequest());
-        }
-        for (String body : new String[]{
-                "{\"digitalPlatformName\":\"Steam\",\"digitalPlatformCompany\":null}",
-                "{\"digitalPlatformName\":123,\"digitalPlatformCompany\":\"Valve\"}"}) {
-            mvc.perform(put("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body))
-                    .andExpect(status().isBadRequest());
-        }
-        verifyNoInteractions(platforms, stores, games);
+    void postRemainsUnchanged() throws Exception {
+        when(games.save(any(VideogameEntity.class))).thenAnswer(i -> i.getArgument(0));
+        when(platforms.save(any(PlatformEntity.class))).thenAnswer(i -> i.getArgument(0));
+        when(stores.save(any(DigitalPlatformEntity.class))).thenAnswer(i -> i.getArgument(0));
+        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"Game\"}")) .andExpect(status().isOk());
+        mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}")) .andExpect(status().isOk());
+        mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}")) .andExpect(status().isOk());
     }
-
-    @Test
-    void postStillAcceptsPartialPlatformAndStore() throws Exception {
-        when(platforms.save(any(PlatformEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(stores.save(any(DigitalPlatformEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}"))
-                .andExpect(status().isOk());
-        mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}"))
-                .andExpect(status().isOk());
-        verify(platforms).save(any(PlatformEntity.class));
-        verify(stores).save(any(DigitalPlatformEntity.class));
-    }
-
 }
