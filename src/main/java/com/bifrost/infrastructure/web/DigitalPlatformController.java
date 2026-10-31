@@ -3,8 +3,7 @@ package com.bifrost.infrastructure.web;
 import com.bifrost.application.port.in.DigitalPlatformUseCase;
 import com.bifrost.domain.DigitalPlatform;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformRequest;
-import com.bifrost.infrastructure.web.dto.UpdateRequests;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.bifrost.infrastructure.web.dto.DigitalPlatformUpdateRequest;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
@@ -45,8 +44,8 @@ public class DigitalPlatformController {
     }
     @PutMapping(value = PATH + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DigitalPlatformResponse updateDigitalPlatform(@PathVariable("id") Integer id, @RequestBody JsonNode request) {
-        return digitalPlatformUseCase.update(id, webMapper.toDomain(UpdateRequests.digitalPlatform(request)))
+    public DigitalPlatformResponse updateDigitalPlatform(@PathVariable("id") Integer id, @RequestBody DigitalPlatformUpdateRequest request) {
+        return digitalPlatformUseCase.update(id, webMapper.toDomain(request.toRequest()))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

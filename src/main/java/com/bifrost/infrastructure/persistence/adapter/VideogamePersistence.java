@@ -58,21 +58,15 @@ public class VideogamePersistence implements VideogameRepositoryPort {
         VideogameEntity saved = videogamesRepository.save(entity);
         return mapper.toDomain(saved);
     }
+
     @Override
     public Optional<Videogame> update(Integer id, Videogame videogame) {
         return videogamesRepository.findById(id).map(entity -> {
-            entity.setVideogameName(videogame.getName());
-            entity.setVideogameType(videogame.getType());
-            entity.setVideogameYear(videogame.getYear());
-            entity.setCompanyName(videogame.getCompanyName());
-            entity.setIsDigital(videogame.getDigital());
-            entity.setIsCompleted(videogame.getCompleted());
-            entity.setIsPlatinum(videogame.getPlatinum());
-            entity.setMultiplayer(videogame.isMultiplayer());
-            entity.setPlatformEntity(videogame.getPlatform() == null || videogame.getPlatform().getId() == null
-                    ? null : platformRepository.getReferenceById(videogame.getPlatform().getId()));
-            entity.setDigitalPlatformEntity(videogame.getDigitalPlatform() == null || videogame.getDigitalPlatform().getId() == null
-                    ? null : digitalPlatformJpa.getReferenceById(videogame.getDigitalPlatform().getId()));
+            PlatformEntity platform = videogame.getPlatform() == null ? null
+                    : platformRepository.getReferenceById(videogame.getPlatform().getId());
+            DigitalPlatformEntity digitalPlatform = videogame.getDigitalPlatform() == null ? null
+                    : digitalPlatformJpa.getReferenceById(videogame.getDigitalPlatform().getId());
+            mapper.updateEntity(videogame, entity, platform, digitalPlatform);
             return mapper.toDomain(entity);
         });
     }

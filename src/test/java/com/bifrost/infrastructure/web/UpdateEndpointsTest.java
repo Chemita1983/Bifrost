@@ -157,4 +157,22 @@ class UpdateEndpointsTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.videogameName").value("Game"));
         verify(games).save(any(VideogameEntity.class));
     }
+    @Test
+    void putRejectsCoercionsOutOfRangeFlagsAndNullRequiredValues() throws Exception {
+        String complete = "{\"videogameName\":\"Game\",\"videogameType\":\"RPG\",\"videogameYear\":\"2024\",\"platformId\":4,\"digitalPlatformId\":5,\"companyName\":\"Studio\",\"isDigital\":1,\"isCompleted\":0,\"isPlatinum\":1,\"multiplayer\":true}";
+        for (String invalid : new String[]{
+                complete.replace("\"platformId\":4", "\"platformId\":\"4\""),
+                complete.replace("\"platformId\":4", "\"platformId\":4.5"),
+                complete.replace("\"isDigital\":1", "\"isDigital\":2"),
+                complete.replace("\"isCompleted\":0", "\"isCompleted\":-1"),
+                complete.replace("\"isPlatinum\":1", "\"isPlatinum\":true"),
+                complete.replace("\"multiplayer\":true", "\"multiplayer\":1"),
+                complete.replace("\"videogameName\":\"Game\"", "\"videogameName\":null"),
+                complete.replace("\"videogameYear\":\"2024\"", "\"videogameYear\":2024")}) {
+            mvc.perform(put("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(invalid))
+                    .andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(games, platforms, stores);
+    }
+
 }

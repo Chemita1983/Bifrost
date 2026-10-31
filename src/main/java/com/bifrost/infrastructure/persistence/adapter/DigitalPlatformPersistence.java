@@ -35,8 +35,7 @@ public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort
     @Override
     public Optional<DigitalPlatform> update(Integer id, DigitalPlatform digitalPlatform) {
         return digitalPlatformJpa.findById(id).map(entity -> {
-            entity.setDigitalPlatformName(digitalPlatform.getName());
-            entity.setDigitalPlatformCompany(digitalPlatform.getCompany());
+            mapper.updateEntity(digitalPlatform, entity);
             return mapper.toDomain(entity);
         });
     }

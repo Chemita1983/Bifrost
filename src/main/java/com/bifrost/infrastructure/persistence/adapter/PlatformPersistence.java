@@ -40,9 +40,7 @@ public class PlatformPersistence implements PlatformRepositoryPort {
     @Override
     public Optional<Platform> update(Integer id, Platform platform) {
         return platformRepository.findById(id).map(entity -> {
-            entity.setPlatformName(platform.getName());
-            entity.setPlatformCompany(platform.getCompany());
-            entity.setPlatformYear(platform.getYear());
+            mapper.updateEntity(platform, entity);
             return mapper.toDomain(entity);
         });
     }
