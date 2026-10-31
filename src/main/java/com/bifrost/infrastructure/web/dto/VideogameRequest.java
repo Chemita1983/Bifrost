@@ -1,14 +1,19 @@
 package com.bifrost.infrastructure.web.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Positive;
+
 public record VideogameRequest(
-        String videogameName,
+        @NotBlank String videogameName,
         String videogameType,
         String videogameYear,
-        Integer platformId,
-        Integer digitalPlatformId,
+        @Positive Integer platformId,
+        @Positive Integer digitalPlatformId,
         String companyName,
-        int isDigital,
-        int isCompleted,
-        int isPlatinum,
+        @Min(0) @Max(1) int isDigital,
+        @Min(0) @Max(1) int isCompleted,
+        @Min(0) @Max(1) int isPlatinum,
         boolean multiplayer) {
 }

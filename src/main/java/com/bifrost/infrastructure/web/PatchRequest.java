@@ -1,6 +1,7 @@
 package com.bifrost.infrastructure.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Validator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,11 +15,10 @@ import java.util.stream.Collectors;
 final class PatchRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Set<String> NULLABLE_RELATIONS = Set.of("platformId", "digitalPlatformId");
-    private static final Set<String> BINARY_FLAGS = Set.of("isDigital", "isCompleted", "isPlatinum");
 
     private PatchRequest() { }
 
-    static void validate(Map<String, Object> body, Class<?> type) {
+    static void validate(Map<String, Object> body, Class<?> type, Validator validator) {
         Map<String, RecordComponent> fields = Arrays.stream(type.getRecordComponents())
                 .collect(Collectors.toMap(RecordComponent::getName, component -> component));
         body.forEach((name, value) -> {
@@ -32,7 +32,7 @@ final class PatchRequest {
             boolean valid = fieldType == String.class ? value instanceof String
                     : fieldType == int.class || fieldType == Integer.class ? value instanceof Integer
                     : fieldType == boolean.class || fieldType == Boolean.class ? value instanceof Boolean : false;
-            if (!valid || (BINARY_FLAGS.contains(name) && !value.equals(0) && !value.equals(1))) {
+            if (!valid || !validator.validateValue(type, name, value).isEmpty()) {
                 throw invalid(name);
             }
         });

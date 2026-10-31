@@ -4,6 +4,8 @@ import com.bifrost.application.port.in.VideogameUseCase;
 import com.bifrost.domain.Videogame;
 import com.bifrost.infrastructure.web.dto.VideogameRequest;
 import java.util.Map;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import com.bifrost.infrastructure.web.dto.VideogameResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
@@ -29,10 +31,12 @@ public class VideogameController {
 
     private final VideogameUseCase videogameUseCase;
     private final WebMapper webMapper;
+    private final Validator validator;
 
-    public VideogameController(VideogameUseCase videogameUseCase, WebMapper webMapper) {
+    public VideogameController(VideogameUseCase videogameUseCase, WebMapper webMapper, Validator validator) {
         this.videogameUseCase = videogameUseCase;
         this.webMapper = webMapper;
+        this.validator = validator;
 	}
 
 	@GetMapping(value = PATH_VIDEOGAME, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,14 +51,14 @@ public class VideogameController {
 
 	@PostMapping(value = PATH_VIDEOGAME, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public VideogameResponse addVideogame(@RequestBody VideogameRequest request) {
+	public VideogameResponse addVideogame(@Valid @RequestBody VideogameRequest request) {
         Videogame videogame = webMapper.toDomain(request);
         return webMapper.toResponse(videogameUseCase.create(videogame));
 	}
     @PatchMapping(value = PATH_VIDEOGAME + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public VideogameResponse updateVideogame(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, VideogameRequest.class);
+        PatchRequest.validate(body, VideogameRequest.class, validator);
         return videogameUseCase.update(id, current -> webMapper.toDomain(
                 PatchRequest.merge(body, webMapper.toRequest(current), VideogameRequest.class)))
                 .map(webMapper::toResponse)

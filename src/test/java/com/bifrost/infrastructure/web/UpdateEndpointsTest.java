@@ -25,11 +25,12 @@ class UpdateEndpointsTest {
     private final VideogamesJpa games = mock(VideogamesJpa.class);
     private final PersistenceMapper persistenceMapper = new PersistenceMapper();
     private final WebMapper webMapper = new WebMapper();
+    private final jakarta.validation.Validator validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
     private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
-            new PlatformController(new PlatformApplicationService(new PlatformPersistence(platforms, persistenceMapper)), webMapper),
-            new DigitalPlatformController(new DigitalPlatformApplicationService(new DigitalPlatformPersistence(stores, persistenceMapper)), webMapper),
-            new VideogameController(new VideogameApplicationService(new VideogamePersistence(games, platforms, stores, persistenceMapper)), webMapper)
-    ).build();
+            new PlatformController(new PlatformApplicationService(new PlatformPersistence(platforms, persistenceMapper)), webMapper, validator),
+            new DigitalPlatformController(new DigitalPlatformApplicationService(new DigitalPlatformPersistence(stores, persistenceMapper)), webMapper, validator),
+            new VideogameController(new VideogameApplicationService(new VideogamePersistence(games, platforms, stores, persistenceMapper)), webMapper, validator)
+    ).setControllerAdvice(new ApiExceptionHandler()).build();
 
     @Test
     void patchesPlatformAndStoreWithoutChangingOmittedFields() throws Exception {
@@ -161,5 +162,39 @@ class UpdateEndpointsTest {
         doThrow(new org.springframework.dao.DataIntegrityViolationException("FK")).when(stores).delete(any(DigitalPlatformEntity.class));
         mvc.perform(delete("/platform/1")).andExpect(status().isConflict());
         mvc.perform(delete("/digital-platform/1")).andExpect(status().isConflict());
+    }
+    @Test
+    void createAndPatchRejectConstraintViolationsBeforePersistence() throws Exception {
+        for (String[] request : new String[][] {
+                {"/platform", "{}"}, {"/platform", "{\"platformName\":\"   \"}"},
+                {"/digital-platform", "{\"digitalPlatformName\":\"\"}"},
+                {"/videogame", "{\"videogameName\":\" \"}"},
+                {"/videogame", "{\"videogameName\":\"Game\",\"isDigital\":2}"},
+                {"/videogame", "{\"videogameName\":\"Game\",\"platformId\":0}"},
+                {"/videogame", "{\"videogameName\":\"Game\",\"digitalPlatformId\":-1}"}
+        }) {
+            mvc.perform(post(request[0]).contentType(MediaType.APPLICATION_JSON).content(request[1]))
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").isNotEmpty());
+        }
+        for (String body : new String[] {"{\"videogameName\":\"  \"}", "{\"platformId\":0}",
+                "{\"digitalPlatformId\":-1}", "{\"isPlatinum\":2}"}) {
+            mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content(body))
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").isNotEmpty());
+        }
+        verifyNoInteractions(games, platforms, stores);
+    }
+
+    @Test
+    void errorResponsesHideUnderlyingDatabaseDetails() throws Exception {
+        when(platforms.findById(1)).thenReturn(Optional.of(new PlatformEntity()));
+        doThrow(new org.springframework.dao.DataIntegrityViolationException("secret database detail"))
+                .when(platforms).delete(any(PlatformEntity.class));
+        mvc.perform(delete("/platform/1")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Resource is in use"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("secret"))));
+        mvc.perform(patch("/platform/99").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.message").value("Not Found"));
+        mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Invalid request body"));
     }
 }
