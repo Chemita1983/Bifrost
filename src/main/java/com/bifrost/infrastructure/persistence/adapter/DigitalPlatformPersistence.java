@@ -43,6 +43,9 @@ public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort
     }
     @Override
     public boolean delete(Integer id) {
-        return digitalPlatformJpa.deleteByIdAndReturnCount(id) > 0;
+        return digitalPlatformJpa.findById(id).map(entity -> {
+            digitalPlatformJpa.delete(entity);
+            return true;
+        }).orElse(false);
     }
 }

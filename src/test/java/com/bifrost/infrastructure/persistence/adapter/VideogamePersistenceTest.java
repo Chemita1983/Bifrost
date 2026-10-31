@@ -13,8 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,10 +76,19 @@ class VideogamePersistenceTest {
         verify(videogamesRepository).save(org.mockito.ArgumentMatchers.any(VideogameEntity.class));
     }
     @Test
-    void deleteReturnsWhetherRowWasAffected() {
-        when(videogamesRepository.deleteByIdAndReturnCount(1)).thenReturn(1, 0);
+    void deleteReturnsTrueWhenEntityExists() {
+        VideogameEntity entity = new VideogameEntity();
+        when(videogamesRepository.findById(1)).thenReturn(Optional.of(entity));
+
         assertThat(adapter.delete(1)).isTrue();
+        verify(videogamesRepository).delete(entity);
+    }
+
+    @Test
+    void deleteReturnsFalseWhenEntityIsMissing() {
+        when(videogamesRepository.findById(1)).thenReturn(Optional.empty());
+
         assertThat(adapter.delete(1)).isFalse();
-        org.mockito.Mockito.verify(videogamesRepository, org.mockito.Mockito.times(2)).deleteByIdAndReturnCount(1);
+        verify(videogamesRepository, never()).delete(any(VideogameEntity.class));
     }
 }

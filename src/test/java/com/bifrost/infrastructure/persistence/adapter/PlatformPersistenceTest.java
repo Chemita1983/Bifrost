@@ -11,8 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,10 +64,19 @@ class PlatformPersistenceTest {
         verify(platformRepository).save(org.mockito.ArgumentMatchers.any(PlatformEntity.class));
     }
     @Test
-    void deleteReturnsWhetherRowWasAffected() {
-        when(platformRepository.deleteByIdAndReturnCount(1)).thenReturn(1, 0);
+    void deleteReturnsTrueWhenEntityExists() {
+        PlatformEntity entity = new PlatformEntity();
+        when(platformRepository.findById(1)).thenReturn(Optional.of(entity));
+
         assertThat(adapter.delete(1)).isTrue();
+        verify(platformRepository).delete(entity);
+    }
+
+    @Test
+    void deleteReturnsFalseWhenEntityIsMissing() {
+        when(platformRepository.findById(1)).thenReturn(Optional.empty());
+
         assertThat(adapter.delete(1)).isFalse();
-        org.mockito.Mockito.verify(platformRepository, org.mockito.Mockito.times(2)).deleteByIdAndReturnCount(1);
+        verify(platformRepository, never()).delete(any(PlatformEntity.class));
     }
 }

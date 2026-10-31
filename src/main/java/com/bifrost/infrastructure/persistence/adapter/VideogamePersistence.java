@@ -80,6 +80,9 @@ public class VideogamePersistence implements VideogameRepositoryPort {
     }
     @Override
     public boolean delete(Integer id) {
-        return videogamesRepository.deleteByIdAndReturnCount(id) > 0;
+        return videogamesRepository.findById(id).map(entity -> {
+            videogamesRepository.delete(entity);
+            return true;
+        }).orElse(false);
     }
 }

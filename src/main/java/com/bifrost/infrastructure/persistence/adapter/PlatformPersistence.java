@@ -48,6 +48,9 @@ public class PlatformPersistence implements PlatformRepositoryPort {
     }
     @Override
     public boolean delete(Integer id) {
-        return platformRepository.deleteByIdAndReturnCount(id) > 0;
+        return platformRepository.findById(id).map(entity -> {
+            platformRepository.delete(entity);
+            return true;
+        }).orElse(false);
     }
 }
