@@ -13,6 +13,7 @@ public class Videogame {
     private int completed;
     private int platinum;
     private boolean multiplayer;
+    private Integer hoursPlayed;
 
     public Videogame() {
     }
@@ -119,5 +120,13 @@ public class Videogame {
 
     public void setMultiplayer(boolean multiplayer) {
         this.multiplayer = multiplayer;
+    }
+
+    public Integer getHoursPlayed() {
+        return hoursPlayed;
+    }
+
+    public void setHoursPlayed(Integer hoursPlayed) {
+        this.hoursPlayed = hoursPlayed;
     }
 }

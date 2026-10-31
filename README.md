@@ -49,9 +49,8 @@ possible to know:
 - Which titles are exclusively multiplayer.
 - Which games are waiting to be started or completed.
 
-The application will evolve into a complete API for managing the collection
-and may later include a web interface for displaying it in a clear and
-attractive way.
+The application provides a REST API for managing the collection. Future work
+includes Steam synchronization and MCP integration for compatible AI clients.
 
 ## Current features
 
@@ -149,11 +148,22 @@ Existing records can be partially updated with `PATCH /videogame/{id}`,
 field names as POST. Omitted fields are preserved. An unknown record or related
 platform ID returns 404; PATCH never creates a record.
 
-Only `platformId` and `digitalPlatformId` may be explicitly `null`, which
-clears that relationship. Other fields reject null. Text values must be strings,
+`platformId` and `digitalPlatformId` may be explicitly `null`, which clears the
+relationship. Optional `hoursPlayed` is a non-negative 32-bit integer; `null`
+means unknown, while `0` is a known value. On PATCH, omitting it preserves the
+current value and explicit `null` clears it. On POST, omission or `null` means
+unknown. Responses omit `hoursPlayed` when unknown, consistent with other null
+response fields. Other PATCH fields reject null. Text values must be strings,
 status fields must be integers 0 or 1, and `multiplayer` must be a boolean.
 Unknown fields and invalid types are rejected with 400 before modifying data.
-POST behavior is unchanged.
+Existing POST fields remain unchanged.
+
+For an existing schema with the legacy `players` column, review the one-time
+script at `database/migrations/20261031_hours_and_sequences.sql`. It removes
+`players`, adds `hours_played`, and adjusts identifier sequences. Back up the
+database and stop writers before running it; it is not applied automatically.
+Existing rows retain unknown hours rather than being assigned zero. The current
+`ddl-auto: update` setting may also change the schema at application startup.
 
 Records can be deleted using `DELETE /videogame/{id}`, `DELETE /platform/{id}`,
 and `DELETE /digital-platform/{id}`. Successful deletion returns 204 and an
@@ -195,10 +205,9 @@ whose schema or data must be preserved. To run only isolated unit and web tests:
 mvn -Dtest='*Test,!BifrostApplicationTests' test
 ```
 
-PATCH was manually checked against a disposable MariaDB restored from a copy of
-the existing schema. The schema has a `players NOT NULL` column that is not
-mapped by the application, and its sequences need attention; inserts can fail.
-Verify changes against a disposable copy before changing the schema or sequences.
+The schema migration and create/update operations were manually checked against
+a disposable MariaDB restored from a backup. This does not replace automated
+database integration tests.
 
 Concurrent updates to the same record can overwrite each other. The current
 implementation is intended for personal use and does not prevent this conflict.
@@ -211,9 +220,9 @@ mvn spring-boot:run
 
 ## Project status
 
-The project is currently under active development. The API and persistence
-foundation are already implemented; the next stages will focus on expanding
-the use cases, improving the documentation, and creating a visual interface.
+The project is currently under active development. The REST API and persistence
+foundation are implemented; future work includes Steam synchronization and MCP
+integration.
 
 ## License
 

@@ -26,7 +26,8 @@ public class WebMapper {
         return new VideogameRequest(game.getName(), game.getType(), game.getYear(),
                 game.getPlatform() == null ? null : game.getPlatform().getId(),
                 game.getDigitalPlatform() == null ? null : game.getDigitalPlatform().getId(),
-                game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(), game.isMultiplayer());
+                game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(), game.isMultiplayer(),
+                game.getHoursPlayed());
     }
 
     public Platform toDomain(PlatformRequest request) {
@@ -51,9 +52,11 @@ public class WebMapper {
         DigitalPlatform digitalPlatform = request.digitalPlatformId() == null ? null
                 : new DigitalPlatform(request.digitalPlatformId(), null, null);
 
-        return new Videogame(null, request.videogameName(), request.videogameType(),
+        Videogame videogame = new Videogame(null, request.videogameName(), request.videogameType(),
                 request.videogameYear(), platform, digitalPlatform, request.companyName(),
                 request.isDigital(), request.isCompleted(), request.isPlatinum(), request.multiplayer());
+        videogame.setHoursPlayed(request.hoursPlayed());
+        return videogame;
     }
 
     public VideogameResponse toResponse(Videogame videogame) {
