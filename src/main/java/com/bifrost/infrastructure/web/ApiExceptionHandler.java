@@ -29,8 +29,9 @@ class ApiExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<Map<String, String>> status(ResponseStatusException exception) {
         String reason = exception.getReason();
+        HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
         String message = exception.getStatusCode().is5xxServerError() ? "Internal server error"
-                : reason != null ? reason : HttpStatus.valueOf(exception.getStatusCode().value()).getReasonPhrase();
+                : reason != null ? reason : status != null ? status.getReasonPhrase() : "HTTP " + exception.getStatusCode().value();
         return ResponseEntity.status(exception.getStatusCode()).body(Map.of("message", message));
     }
 }

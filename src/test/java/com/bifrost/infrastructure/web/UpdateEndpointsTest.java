@@ -197,4 +197,17 @@ class UpdateEndpointsTest {
         mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Invalid request body"));
     }
+
+    @Test
+    void createReportsMultipleSortedValidationErrorsAndPatchReportsInvalidField() throws Exception {
+        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"videogameName\":\" \",\"platformId\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("platformId: must be greater than 0; videogameName: must not be blank"));
+        mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"multiplayer\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid field: multiplayer"));
+        verifyNoInteractions(games, platforms, stores);
+    }
 }
