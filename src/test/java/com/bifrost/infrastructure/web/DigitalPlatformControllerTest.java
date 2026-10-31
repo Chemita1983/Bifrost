@@ -5,6 +5,7 @@ import com.bifrost.domain.DigitalPlatform;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformRequest;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,14 +67,29 @@ class DigitalPlatformControllerTest {
         DigitalPlatform current = new DigitalPlatform(1, "Steam", "Valve");
         when(digitalPlatformUseCase.update(eq(1), any())).thenAnswer(invocation -> {
             UnaryOperator<DigitalPlatform> update = invocation.getArgument(1);
-            return Optional.of(update.apply(current));
+            DigitalPlatform updated = update.apply(current);
+            updated.setId(current.getId());
+            return Optional.of(updated);
         });
 
         DigitalPlatformResponse result = controller.updateDigitalPlatform(1, Map.of("digitalPlatformName", "Steam Updated"));
 
+        assertThat(result.id()).isEqualTo(1);
         assertThat(result.digitalPlatformName()).isEqualTo("Steam Updated");
         assertThat(result.digitalPlatformCompany()).isEqualTo("Valve");
         verify(digitalPlatformUseCase).update(eq(1), any());
+    }
+
+    @Test
+    void shouldSerializeDigitalPlatformResponseWithIdAndExistingFields() throws Exception {
+        DigitalPlatformResponse response = DigitalPlatformResponse.from(new DigitalPlatform(8, "Steam", "Valve"));
+        ObjectMapper mapper = new ObjectMapper();
+
+        assertThat(response.id()).isEqualTo(8);
+        assertThat(mapper.readTree(mapper.writeValueAsBytes(response)))
+                .isEqualTo(mapper.readTree("""
+                        {"id":8,"digitalPlatformName":"Steam","digitalPlatformCompany":"Valve"}
+                        """));
     }
 
     @Test

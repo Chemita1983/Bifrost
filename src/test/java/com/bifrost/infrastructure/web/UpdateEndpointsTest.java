@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,9 +40,11 @@ class UpdateEndpointsTest {
         when(platforms.findById(1)).thenReturn(Optional.of(platform));
         when(stores.findById(2)).thenReturn(Optional.of(store));
         mvc.perform(patch("/platform/1").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.platformCompany").value("Nintendo"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.platformCompany").value("Nintendo"));
         mvc.perform(patch("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.digitalPlatformCompany").value("Valve"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.digitalPlatformCompany").value("Valve"));
         assertThat(platform.getPlatformName()).isEqualTo("Switch");
         assertThat(platform.getPlatformYear()).isEqualTo("2017");
         assertThat(store.getDigitalPlatformName()).isEqualTo("Steam");
@@ -78,7 +81,9 @@ class UpdateEndpointsTest {
         when(platforms.findById(4)).thenReturn(Optional.of(platform)); when(stores.findById(5)).thenReturn(Optional.of(store));
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"platformId\":4,\"digitalPlatformId\":5}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.platform.platformName").value("PC"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.platform.platformName").value("PC"))
+                .andExpect(jsonPath("$.platform.id").value(4))
+                .andExpect(jsonPath("$.digitalPlatform.id").value(5));
         assertThat(game.getPlatformEntity()).isSameAs(platform); assertThat(game.getDigitalPlatformEntity()).isSameAs(store);
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"videogameName\":\"Changed\",\"platformId\":99}")) .andExpect(status().isNotFound());
@@ -109,6 +114,23 @@ class UpdateEndpointsTest {
         for (String body : new String[]{"{\"digitalPlatformCompany\":null}", "{\"digitalPlatformName\":123}"})
             mvc.perform(patch("/digital-platform/2").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
         verifyNoInteractions(games, platforms, stores);
+    }
+
+    @Test
+    void platformAndStoreIdsAreAlsoExposedByGetAndPost() throws Exception {
+        PlatformEntity platform = new PlatformEntity(); platform.setId(1); platform.setPlatformName("Switch");
+        DigitalPlatformEntity store = new DigitalPlatformEntity(); store.setId(2); store.setDigitalPlatformName("Steam");
+        when(platforms.findAll()).thenReturn(List.of(platform));
+        when(stores.findAll()).thenReturn(List.of(store));
+        when(platforms.save(any(PlatformEntity.class))).thenReturn(platform);
+        when(stores.save(any(DigitalPlatformEntity.class))).thenReturn(store);
+
+        mvc.perform(get("/platform")).andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(1));
+        mvc.perform(get("/digital-platform")).andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(2));
+        mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{\"platformName\":\"Switch\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1));
+        mvc.perform(post("/digital-platform").contentType(MediaType.APPLICATION_JSON).content("{\"digitalPlatformName\":\"Steam\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2));
     }
 
     @Test

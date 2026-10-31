@@ -1,9 +1,8 @@
 package com.bifrost.infrastructure.web.dto;
 
 import com.bifrost.domain.Platform;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public record PlatformResponse(@JsonIgnore Integer id, String platformName, String platformCompany,
+public record PlatformResponse(Integer id, String platformName, String platformCompany,
                                String platformYear) {
 
     public static PlatformResponse from(Platform platform) {

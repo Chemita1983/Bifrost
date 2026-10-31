@@ -176,11 +176,13 @@ whose schema or data must be preserved. To run only isolated unit and web tests:
 mvn -Dtest='*Test,!BifrostApplicationTests' test
 ```
 
-PATCH has not been verified against the existing MariaDB schema. That schema
-has a `players NOT NULL` column that is not mapped by the application, and its
-sequences are at 1. The impact of that column on updates has not been tested;
-inserts can fail without a suitable value for it. Verify against a disposable
-copy before making any schema or sequence changes; none are performed here.
+PATCH was manually checked against a disposable MariaDB restored from a copy of
+the existing schema. The schema has a `players NOT NULL` column that is not
+mapped by the application, and its sequences need attention; inserts can fail.
+Verify changes against a disposable copy before changing the schema or sequences.
+
+Concurrent updates to the same record can overwrite each other. The current
+implementation is intended for personal use and does not prevent this conflict.
 
 ### Run the application
 
