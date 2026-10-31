@@ -80,6 +80,32 @@ public class PersistenceMapper {
         return entity;
     }
 
+    /** Updates managed entities without replacing their identifiers or managed relations. */
+    public void updateEntity(Platform source, PlatformEntity target) {
+        target.setPlatformName(source.getName());
+        target.setPlatformCompany(source.getCompany());
+        target.setPlatformYear(source.getYear());
+    }
+
+    public void updateEntity(DigitalPlatform source, DigitalPlatformEntity target) {
+        target.setDigitalPlatformName(source.getName());
+        target.setDigitalPlatformCompany(source.getCompany());
+    }
+
+    public void updateEntity(Videogame source, VideogameEntity target,
+                             PlatformEntity platform, DigitalPlatformEntity digitalPlatform) {
+        target.setVideogameName(source.getName());
+        target.setVideogameType(source.getType());
+        target.setVideogameYear(source.getYear());
+        target.setCompanyName(source.getCompanyName());
+        target.setIsDigital(source.getDigital());
+        target.setIsCompleted(source.getCompleted());
+        target.setIsPlatinum(source.getPlatinum());
+        target.setMultiplayer(source.isMultiplayer());
+        target.setPlatformEntity(platform);
+        target.setDigitalPlatformEntity(digitalPlatform);
+    }
+
     private void setId(com.bifrost.infrastructure.persistence.entity.BifrostEntity entity, Integer id) {
         if (id != null) {
             entity.setId(id);

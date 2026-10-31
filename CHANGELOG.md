@@ -1,41 +1,52 @@
 # Changelog
 
-Todos los cambios relevantes de Bifröst se documentarán en este archivo.
+All notable changes to Bifröst will be documented in this file.
+
+## [Unreleased]
+
+### Added
+
+- PATCH endpoints for partially updating video games, platforms, and digital stores.
+- Validation of update fields and unit tests for the controllers.
+
+### Changed
+
+- Platform and digital store identifiers are included in API responses to support updates.
 
 ## [0.3.0-SNAPSHOT] - 2026-10-24
 
-### Cambiado
+### Changed
 
-- Reorganizado el proyecto siguiendo arquitectura hexagonal.
-- Separado el dominio de las entidades JPA.
-- Añadidos puertos de entrada y salida para videojuegos, plataformas y tiendas digitales.
-- Añadidos adaptadores de entrada web y salida de persistencia.
-- Añadidos DTOs y mappers para las capas web y de persistencia.
-- Eliminada la estructura antigua basada en `BifrostService` y servicios genéricos.
-- Corregida la nomenclatura de paquetes a `com.bifrost`.
-- Añadidos endpoints para plataformas digitales.
-- Añadidos tests unitarios de controladores, servicios, mappers y persistencia.
+- Reorganized the project using hexagonal architecture.
+- Separated the domain from JPA entities.
+- Added input and output ports for video games, platforms, and digital stores.
+- Added web input and persistence output adapters.
+- Added DTOs and mappers for the web and persistence layers.
+- Removed the old structure based on `BifrostService` and generic services.
+- Corrected package naming to `com.bifrost`.
+- Added endpoints for digital platforms.
+- Added unit tests for controllers, services, mappers, and persistence adapters.
 
 ## [0.2.0-SNAPSHOT] - 2026-10-24
 
-### Cambiado
+### Changed
 
-- Actualizado Spring Boot de 2.2.4 a 3.5.16.
-- Actualizado el proyecto para utilizar Java 17.
-- Migradas las APIs de `javax` a `jakarta`.
-- Migrado el test de contexto a JUnit 5.
-- Añadido `spring-boot-starter-validation`.
+- Upgraded Spring Boot from 2.2.4 to 3.5.16.
+- Updated the project to use Java 17.
+- Migrated APIs from `javax` to `jakarta`.
+- Migrated the context test to JUnit 5.
+- Added `spring-boot-starter-validation`.
 
 ## [0.1.0-SNAPSHOT] - 2026-10-24
 
-### Añadido
+### Added
 
-- Configuración inicial de MariaDB mediante Docker Compose.
-- Volumen persistente `bifrost_videogames_data` para conservar los datos.
-- Configuración de conexión de Spring Boot mediante variables de entorno.
-- Driver de MariaDB para Spring Data JPA.
+- Initial MariaDB configuration using Docker Compose.
+- Persistent `bifrost_videogames_data` volume to preserve data.
+- Spring Boot connection configuration through environment variables.
+- MariaDB driver for Spring Data JPA.
 
-### Cambiado
+### Changed
 
-- Actualizada la versión de Lombok para compatibilidad con Java 17.
-- Corregida la configuración del test de contexto de Spring Boot.
+- Updated Lombok for Java 17 compatibility.
+- Fixed the Spring Boot context test configuration.

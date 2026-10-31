@@ -10,8 +10,12 @@ import com.bifrost.infrastructure.persistence.repository.DigitalPlatformJpa;
 import com.bifrost.infrastructure.persistence.repository.PlatformJpa;
 import com.bifrost.infrastructure.persistence.repository.VideogamesJpa;
 import org.springframework.stereotype.Repository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @Repository
 public class VideogamePersistence implements VideogameRepositoryPort {
@@ -56,5 +60,22 @@ public class VideogamePersistence implements VideogameRepositoryPort {
         }
         VideogameEntity saved = videogamesRepository.save(entity);
         return mapper.toDomain(saved);
+    }
+
+    @Override
+    public Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch) {
+        return videogamesRepository.findById(id).map(entity -> {
+            Videogame videogame = patch.apply(mapper.toDomain(entity));
+            PlatformEntity platform = videogame.getPlatform() == null ? null
+                    : entity.getPlatformEntity() != null && videogame.getPlatform().getId().equals(entity.getPlatformEntity().getId())
+                    ? entity.getPlatformEntity() : platformRepository.findById(videogame.getPlatform().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platform not found"));
+            DigitalPlatformEntity digitalPlatform = videogame.getDigitalPlatform() == null ? null
+                    : entity.getDigitalPlatformEntity() != null && videogame.getDigitalPlatform().getId().equals(entity.getDigitalPlatformEntity().getId())
+                    ? entity.getDigitalPlatformEntity() : digitalPlatformJpa.findById(videogame.getDigitalPlatform().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Digital platform not found"));
+            mapper.updateEntity(videogame, entity, platform, digitalPlatform);
+            return mapper.toDomain(entity);
+        });
     }
 }

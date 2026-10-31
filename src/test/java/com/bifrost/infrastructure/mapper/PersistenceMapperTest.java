@@ -35,4 +35,23 @@ class PersistenceMapperTest {
         assertThat(result.getDigitalPlatformCompany()).isEqualTo("Valve");
     }
 
+    @Test
+    void updateKeepsManagedIdAndUsesResolvedRelations() {
+        var target = new com.bifrost.infrastructure.persistence.entity.VideogameEntity();
+        target.setId(7);
+        var platform = new com.bifrost.infrastructure.persistence.entity.PlatformEntity();
+        var store = new DigitalPlatformEntity();
+        var source = new com.bifrost.domain.Videogame();
+        source.setId(99);
+        source.setName("Updated");
+        mapper.updateEntity(source, target, platform, store);
+        assertThat(target.getId()).isEqualTo(7);
+        assertThat(target.getVideogameName()).isEqualTo("Updated");
+        assertThat(target.getPlatformEntity()).isSameAs(platform);
+        assertThat(target.getDigitalPlatformEntity()).isSameAs(store);
+        mapper.updateEntity(source, target, null, null);
+        assertThat(target.getPlatformEntity()).isNull();
+        assertThat(target.getDigitalPlatformEntity()).isNull();
+    }
+
 }

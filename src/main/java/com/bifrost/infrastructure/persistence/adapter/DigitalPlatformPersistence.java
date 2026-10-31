@@ -8,6 +8,8 @@ import com.bifrost.infrastructure.persistence.repository.DigitalPlatformJpa;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @Repository
 public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort {
@@ -30,5 +32,13 @@ public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort
     public DigitalPlatform save(DigitalPlatform digitalPlatform) {
         DigitalPlatformEntity saved = digitalPlatformJpa.save(mapper.toEntity(digitalPlatform));
         return mapper.toDomain(saved);
+    }
+    @Override
+    public Optional<DigitalPlatform> update(Integer id, UnaryOperator<DigitalPlatform> patch) {
+        return digitalPlatformJpa.findById(id).map(entity -> {
+            DigitalPlatform digitalPlatform = patch.apply(mapper.toDomain(entity));
+            mapper.updateEntity(digitalPlatform, entity);
+            return mapper.toDomain(entity);
+        });
     }
 }

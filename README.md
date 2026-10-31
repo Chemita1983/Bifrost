@@ -132,6 +132,17 @@ The REST layer uses request and response DTOs. Mappers translate between the
 external API representation and the internal domain model, preventing web
 contracts from leaking into the business layer.
 
+Existing records can be partially updated with `PATCH /videogame/{id}`,
+`PATCH /platform/{id}`, and `PATCH /digital-platform/{id}`, using the same
+field names as POST. Omitted fields are preserved. An unknown record or related
+platform ID returns 404; PATCH never creates a record.
+
+Only `platformId` and `digitalPlatformId` may be explicitly `null`, which
+clears that relationship. Other fields reject null. Text values must be strings,
+status fields must be integers 0 or 1, and `multiplayer` must be a boolean.
+Unknown fields and invalid types are rejected with 400 before modifying data.
+POST behavior is unchanged.
+
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,
@@ -156,6 +167,22 @@ docker compose up -d
 ```bash
 mvn clean test
 ```
+
+The Spring Boot context test uses the configured MariaDB datasource and the
+application's `ddl-auto: update` setting. Do not run it against a database
+whose schema or data must be preserved. To run only isolated unit and web tests:
+
+```bash
+mvn -Dtest='*Test,!BifrostApplicationTests' test
+```
+
+PATCH was manually checked against a disposable MariaDB restored from a copy of
+the existing schema. The schema has a `players NOT NULL` column that is not
+mapped by the application, and its sequences need attention; inserts can fail.
+Verify changes against a disposable copy before changing the schema or sequences.
+
+Concurrent updates to the same record can overwrite each other. The current
+implementation is intended for personal use and does not prevent this conflict.
 
 ### Run the application
 

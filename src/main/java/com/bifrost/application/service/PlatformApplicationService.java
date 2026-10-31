@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @Service
 public class PlatformApplicationService implements PlatformUseCase {
@@ -33,5 +35,10 @@ public class PlatformApplicationService implements PlatformUseCase {
     @Transactional
     public Platform create(Platform platform) {
         return platformRepository.save(platform);
+    }
+    @Override
+    @Transactional
+    public Optional<Platform> update(Integer id, UnaryOperator<Platform> patch) {
+        return platformRepository.update(id, patch);
     }
 }

@@ -3,6 +3,8 @@ package com.bifrost.application.port.in;
 import com.bifrost.domain.Videogame;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public interface VideogameUseCase {
 
@@ -11,4 +13,5 @@ public interface VideogameUseCase {
     List<Videogame> getByName(String name);
 
     Videogame create(Videogame videogame);
+    Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
 }
