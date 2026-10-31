@@ -1,4 +1,6 @@
 package com.bifrost.infrastructure.web.dto;
 
-public record PlatformRequest(String platformName, String platformCompany, String platformYear) {
+import jakarta.validation.constraints.NotBlank;
+
+public record PlatformRequest(@NotBlank String platformName, String platformCompany, String platformYear) {
 }

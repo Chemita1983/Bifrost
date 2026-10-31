@@ -4,6 +4,8 @@ import com.bifrost.application.port.in.PlatformUseCase;
 import com.bifrost.domain.Platform;
 import com.bifrost.infrastructure.web.dto.PlatformRequest;
 import java.util.Map;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import com.bifrost.infrastructure.web.dto.PlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
@@ -29,10 +31,12 @@ public class PlatformController {
 
     private final PlatformUseCase platformUseCase;
     private final WebMapper webMapper;
+    private final Validator validator;
 
-    public PlatformController(PlatformUseCase platformUseCase, WebMapper webMapper) {
+    public PlatformController(PlatformUseCase platformUseCase, WebMapper webMapper, Validator validator) {
         this.platformUseCase = platformUseCase;
         this.webMapper = webMapper;
+        this.validator = validator;
     }
 
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,16 +47,16 @@ public class PlatformController {
 
     @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public PlatformResponse addPlatform(@RequestBody PlatformRequest request) {
+    public PlatformResponse addPlatform(@Valid @RequestBody PlatformRequest request) {
         Platform platform = webMapper.toDomain(request);
         return webMapper.toResponse(platformUseCase.create(platform));
     }
     @PatchMapping(value = PATH + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public PlatformResponse updatePlatform(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, PlatformRequest.class);
+        PatchRequest.validatePlatform(body, validator);
         return platformUseCase.update(id, current -> webMapper.toDomain(
-                PatchRequest.merge(body, webMapper.toRequest(current), PlatformRequest.class)))
+                PatchRequest.merge(body, webMapper.toRequest(current))))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

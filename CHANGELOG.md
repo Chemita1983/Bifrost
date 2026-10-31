@@ -6,6 +6,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- Jakarta Bean Validation for create requests and supplied PATCH fields, with centralized API error responses.
+- Set English as the default locale for validation messages.
 - PATCH endpoints for partially updating video games, platforms, and digital stores.
 - Validation of update fields and unit tests for the controllers.
 - DELETE endpoints for video games, platforms, and digital stores; associated platforms and stores cannot be deleted.
@@ -36,7 +38,6 @@ All notable changes to Bifröst will be documented in this file.
 - Updated the project to use Java 17.
 - Migrated APIs from `javax` to `jakarta`.
 - Migrated the context test to JUnit 5.
-- Added `spring-boot-starter-validation`.
 
 ## [0.1.0-SNAPSHOT] - 2026-10-24
 

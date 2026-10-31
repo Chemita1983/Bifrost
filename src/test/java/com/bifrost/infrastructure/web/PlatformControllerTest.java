@@ -37,7 +37,7 @@ class PlatformControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new PlatformController(platformUseCase, new WebMapper());
+        controller = new PlatformController(platformUseCase, new WebMapper(), jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test

@@ -1,48 +1,88 @@
 package com.bifrost.infrastructure.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bifrost.infrastructure.web.dto.DigitalPlatformRequest;
+import com.bifrost.infrastructure.web.dto.PlatformRequest;
+import com.bifrost.infrastructure.web.dto.VideogameRequest;
+import jakarta.validation.Validator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.lang.reflect.RecordComponent;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-/** A map preserves the distinction between absent properties and explicit nulls. */
+/** The map distinguishes an omitted property from an explicit null. */
 final class PatchRequest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Set<String> NULLABLE_RELATIONS = Set.of("platformId", "digitalPlatformId");
-    private static final Set<String> BINARY_FLAGS = Set.of("isDigital", "isCompleted", "isPlatinum");
-
     private PatchRequest() { }
 
-    static void validate(Map<String, Object> body, Class<?> type) {
-        Map<String, RecordComponent> fields = Arrays.stream(type.getRecordComponents())
-                .collect(Collectors.toMap(RecordComponent::getName, component -> component));
+    static void validatePlatform(Map<String, Object> body, Validator validator) {
         body.forEach((name, value) -> {
-            RecordComponent field = fields.get(name);
-            if (field == null) throw invalid(name);
-            if (value == null) {
-                if (!NULLABLE_RELATIONS.contains(name)) throw invalid(name);
-                return;
-            }
-            Class<?> fieldType = field.getType();
-            boolean valid = fieldType == String.class ? value instanceof String
-                    : fieldType == int.class || fieldType == Integer.class ? value instanceof Integer
-                    : fieldType == boolean.class || fieldType == Boolean.class ? value instanceof Boolean : false;
-            if (!valid || (BINARY_FLAGS.contains(name) && !value.equals(0) && !value.equals(1))) {
-                throw invalid(name);
+            switch (name) {
+                case "platformName", "platformCompany", "platformYear" ->
+                        validateField(PlatformRequest.class, name, value, String.class, false, validator);
+                default -> throw invalid(name);
             }
         });
     }
 
-    static <T> T merge(Map<String, Object> body, T current, Class<T> type) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> values = MAPPER.convertValue(current, Map.class);
-        values.putAll(body);
-        return MAPPER.convertValue(values, type);
+    static void validateDigitalPlatform(Map<String, Object> body, Validator validator) {
+        body.forEach((name, value) -> {
+            switch (name) {
+                case "digitalPlatformName", "digitalPlatformCompany" ->
+                        validateField(DigitalPlatformRequest.class, name, value, String.class, false, validator);
+                default -> throw invalid(name);
+            }
+        });
+    }
+
+    static void validateVideogame(Map<String, Object> body, Validator validator) {
+        body.forEach((name, value) -> {
+            switch (name) {
+                case "videogameName", "videogameType", "videogameYear", "companyName" ->
+                        validateField(VideogameRequest.class, name, value, String.class, false, validator);
+                case "platformId", "digitalPlatformId" ->
+                        validateField(VideogameRequest.class, name, value, Integer.class, true, validator);
+                case "isDigital", "isCompleted", "isPlatinum" ->
+                        validateField(VideogameRequest.class, name, value, Integer.class, false, validator);
+                case "multiplayer" ->
+                        validateField(VideogameRequest.class, name, value, Boolean.class, false, validator);
+                default -> throw invalid(name);
+            }
+        });
+    }
+
+    private static void validateField(Class<?> requestType, String name, Object value, Class<?> valueType,
+                                      boolean nullable, Validator validator) {
+        if (value == null) {
+            if (!nullable) throw invalid(name);
+        } else if (!valueType.isInstance(value) || !validator.validateValue(requestType, name, value).isEmpty()) {
+            throw invalid(name);
+        }
+    }
+
+    static PlatformRequest merge(Map<String, Object> body, PlatformRequest current) {
+        return new PlatformRequest(
+                (String) body.getOrDefault("platformName", current.platformName()),
+                (String) body.getOrDefault("platformCompany", current.platformCompany()),
+                (String) body.getOrDefault("platformYear", current.platformYear()));
+    }
+
+    static DigitalPlatformRequest merge(Map<String, Object> body, DigitalPlatformRequest current) {
+        return new DigitalPlatformRequest(
+                (String) body.getOrDefault("digitalPlatformName", current.digitalPlatformName()),
+                (String) body.getOrDefault("digitalPlatformCompany", current.digitalPlatformCompany()));
+    }
+
+    static VideogameRequest merge(Map<String, Object> body, VideogameRequest current) {
+        return new VideogameRequest(
+                (String) body.getOrDefault("videogameName", current.videogameName()),
+                (String) body.getOrDefault("videogameType", current.videogameType()),
+                (String) body.getOrDefault("videogameYear", current.videogameYear()),
+                (Integer) body.getOrDefault("platformId", current.platformId()),
+                (Integer) body.getOrDefault("digitalPlatformId", current.digitalPlatformId()),
+                (String) body.getOrDefault("companyName", current.companyName()),
+                (Integer) body.getOrDefault("isDigital", current.isDigital()),
+                (Integer) body.getOrDefault("isCompleted", current.isCompleted()),
+                (Integer) body.getOrDefault("isPlatinum", current.isPlatinum()),
+                (Boolean) body.getOrDefault("multiplayer", current.multiplayer()));
     }
 
     private static ResponseStatusException invalid(String field) {

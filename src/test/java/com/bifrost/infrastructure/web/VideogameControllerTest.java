@@ -36,7 +36,7 @@ class VideogameControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new VideogameController(videogameUseCase, new WebMapper());
+        controller = new VideogameController(videogameUseCase, new WebMapper(), jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test

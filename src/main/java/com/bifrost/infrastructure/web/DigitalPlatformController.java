@@ -4,6 +4,8 @@ import com.bifrost.application.port.in.DigitalPlatformUseCase;
 import com.bifrost.domain.DigitalPlatform;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformRequest;
 import java.util.Map;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import com.bifrost.infrastructure.web.dto.DigitalPlatformResponse;
 import com.bifrost.infrastructure.mapper.WebMapper;
 import org.springframework.http.MediaType;
@@ -28,10 +30,12 @@ public class DigitalPlatformController {
 
     private final DigitalPlatformUseCase digitalPlatformUseCase;
     private final WebMapper webMapper;
+    private final Validator validator;
 
-    public DigitalPlatformController(DigitalPlatformUseCase digitalPlatformUseCase, WebMapper webMapper) {
+    public DigitalPlatformController(DigitalPlatformUseCase digitalPlatformUseCase, WebMapper webMapper, Validator validator) {
         this.digitalPlatformUseCase = digitalPlatformUseCase;
         this.webMapper = webMapper;
+        this.validator = validator;
     }
 
     @GetMapping(value = PATH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -41,16 +45,16 @@ public class DigitalPlatformController {
 
     @PostMapping(value = PATH, consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DigitalPlatformResponse addDigitalPlatform(@RequestBody DigitalPlatformRequest request) {
+    public DigitalPlatformResponse addDigitalPlatform(@Valid @RequestBody DigitalPlatformRequest request) {
         DigitalPlatform platform = webMapper.toDomain(request);
         return webMapper.toResponse(digitalPlatformUseCase.create(platform));
     }
     @PatchMapping(value = PATH + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DigitalPlatformResponse updateDigitalPlatform(@PathVariable("id") Integer id, @RequestBody Map<String, Object> body) {
-        PatchRequest.validate(body, DigitalPlatformRequest.class);
+        PatchRequest.validateDigitalPlatform(body, validator);
         return digitalPlatformUseCase.update(id, current -> webMapper.toDomain(
-                PatchRequest.merge(body, webMapper.toRequest(current), DigitalPlatformRequest.class)))
+                PatchRequest.merge(body, webMapper.toRequest(current))))
                 .map(webMapper::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }

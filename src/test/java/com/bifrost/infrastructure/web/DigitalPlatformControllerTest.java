@@ -37,7 +37,7 @@ class DigitalPlatformControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new DigitalPlatformController(digitalPlatformUseCase, new WebMapper());
+        controller = new DigitalPlatformController(digitalPlatformUseCase, new WebMapper(), jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator());
     }
 
     @Test
