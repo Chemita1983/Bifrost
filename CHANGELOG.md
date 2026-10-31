@@ -7,7 +7,6 @@ All notable changes to Bifröst will be documented in this file.
 ### Added
 
 - Combinable platform, digital, completion, multiplayer, and partial case-insensitive type filters for `GET /videogames`.
-
 - Jakarta Bean Validation for create requests and supplied PATCH fields, with centralized API error responses.
 - Set English as the default locale for validation messages.
 - PATCH endpoints for partially updating video games, platforms, and digital stores.
