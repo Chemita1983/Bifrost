@@ -1,6 +1,11 @@
 package com.bifrost.infrastructure.web;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
+import com.bifrost.application.port.in.PlatformUseCase;
+import com.bifrost.infrastructure.mapper.WebMapper;
+import jakarta.validation.Validation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,9 +23,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class ApiExceptionHandlerTest {
     private final ApiExceptionHandler handler = new ApiExceptionHandler();
+
+    @Test
+    void typeMismatchReturnsSafeBadRequestButUnsupportedConversionRemainsServerError() {
+        var invalid = handler.typeMismatch(new TypeMismatchException("secret", Integer.class));
+        assertThat(invalid.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(invalid.getBody()).containsOnlyKeys("message")
+                .containsEntry("message", "Invalid parameter value");
+
+        var unsupported = handler.typeMismatch(new ConversionNotSupportedException("secret", Integer.class, null));
+        assertThat(unsupported.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(unsupported.getBody()).containsOnlyKeys("message")
+                .containsEntry("message", "Internal server error");
+    }
+
+    @Test
+    void mvcRejectsNonNumericPlatformIdWithoutCallingUseCase() throws Exception {
+        var useCase = mock(PlatformUseCase.class);
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            var controller = new PlatformController(useCase, new WebMapper(), factory.getValidator());
+            var mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(handler).build();
+
+            mvc.perform(delete("/platform/not-a-number"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().json("{\"message\":\"Invalid parameter value\"}", true));
+            verifyNoInteractions(useCase);
+        }
+    }
 
     @Test
     void returnsSafeMessagesForStatusAndMalformedBody() {

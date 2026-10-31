@@ -7,6 +7,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +33,14 @@ class ApiExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<Map<String, String>> malformedBody() {
         return ResponseEntity.badRequest().body(Map.of("message", "Invalid request body"));
+    }
+
+    @ExceptionHandler(TypeMismatchException.class)
+    ResponseEntity<Map<String, String>> typeMismatch(TypeMismatchException exception) {
+        if (exception instanceof ConversionNotSupportedException) {
+            return unexpected(exception);
+        }
+        return ResponseEntity.badRequest().body(Map.of("message", "Invalid parameter value"));
     }
 
     @ExceptionHandler(ResponseStatusException.class)

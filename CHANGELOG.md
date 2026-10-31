@@ -5,6 +5,10 @@ All notable changes to Bifröst will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Return HTTP 400 for invalid path or query parameter types instead of HTTP 500.
+
 ### Added
 
 - MariaDB 11.4 Testcontainers integration tests covering API operations, filters,
