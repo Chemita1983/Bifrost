@@ -8,6 +8,7 @@ import com.bifrost.infrastructure.persistence.repository.DigitalPlatformJpa;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort {
@@ -30,5 +31,13 @@ public class DigitalPlatformPersistence implements DigitalPlatformRepositoryPort
     public DigitalPlatform save(DigitalPlatform digitalPlatform) {
         DigitalPlatformEntity saved = digitalPlatformJpa.save(mapper.toEntity(digitalPlatform));
         return mapper.toDomain(saved);
+    }
+    @Override
+    public Optional<DigitalPlatform> update(Integer id, DigitalPlatform digitalPlatform) {
+        return digitalPlatformJpa.findById(id).map(entity -> {
+            entity.setDigitalPlatformName(digitalPlatform.getName());
+            entity.setDigitalPlatformCompany(digitalPlatform.getCompany());
+            return mapper.toDomain(entity);
+        });
     }
 }

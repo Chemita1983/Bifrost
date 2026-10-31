@@ -12,6 +12,7 @@ import com.bifrost.infrastructure.persistence.repository.VideogamesJpa;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class VideogamePersistence implements VideogameRepositoryPort {
@@ -56,5 +57,23 @@ public class VideogamePersistence implements VideogameRepositoryPort {
         }
         VideogameEntity saved = videogamesRepository.save(entity);
         return mapper.toDomain(saved);
+    }
+    @Override
+    public Optional<Videogame> update(Integer id, Videogame videogame) {
+        return videogamesRepository.findById(id).map(entity -> {
+            entity.setVideogameName(videogame.getName());
+            entity.setVideogameType(videogame.getType());
+            entity.setVideogameYear(videogame.getYear());
+            entity.setCompanyName(videogame.getCompanyName());
+            entity.setIsDigital(videogame.getDigital());
+            entity.setIsCompleted(videogame.getCompleted());
+            entity.setIsPlatinum(videogame.getPlatinum());
+            entity.setMultiplayer(videogame.isMultiplayer());
+            entity.setPlatformEntity(videogame.getPlatform() == null || videogame.getPlatform().getId() == null
+                    ? null : platformRepository.getReferenceById(videogame.getPlatform().getId()));
+            entity.setDigitalPlatformEntity(videogame.getDigitalPlatform() == null || videogame.getDigitalPlatform().getId() == null
+                    ? null : digitalPlatformJpa.getReferenceById(videogame.getDigitalPlatform().getId()));
+            return mapper.toDomain(entity);
+        });
     }
 }

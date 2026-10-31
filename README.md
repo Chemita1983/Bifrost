@@ -132,6 +132,19 @@ The REST layer uses request and response DTOs. Mappers translate between the
 external API representation and the internal domain model, preventing web
 contracts from leaking into the business layer.
 
+Existing records can be replaced using `PUT /videogame/{id}`,
+`PUT /platform/{id}`, and `PUT /digital-platform/{id}`, using the same request
+fields as the corresponding POST endpoint. An unknown ID returns 404; PUT does
+not create a record.
+
+PUT requires every request field, including `platformId` and
+`digitalPlatformId` for videogames. The two relationship IDs may explicitly
+be `null` to clear the relationship; omission is rejected with 400. Text
+fields must be strings, status fields integers, and `multiplayer` a boolean;
+null and missing values for those fields are rejected. These stricter PUT
+requirements do not change POST behavior. An incomplete or invalid PUT is
+rejected before looking up or modifying the record.
+
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,
@@ -156,6 +169,20 @@ docker compose up -d
 ```bash
 mvn clean test
 ```
+
+The Spring Boot context test uses the configured MariaDB datasource and the
+application's `ddl-auto: update` setting. Do not run it against a database
+whose schema or data must be preserved. To run only isolated unit and web tests:
+
+```bash
+mvn -Dtest='*Test,!BifrostApplicationTests' test
+```
+
+PUT has not been verified against the existing MariaDB schema. That schema
+has a `players NOT NULL` column that is not mapped by the application, and its
+sequences are at 1. The impact of that column on updates has not been tested;
+inserts can fail without a suitable value for it. Verify against a disposable
+copy before making any schema or sequence changes; none are performed here.
 
 ### Run the application
 

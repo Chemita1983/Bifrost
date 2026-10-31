@@ -8,6 +8,7 @@ import com.bifrost.infrastructure.persistence.repository.PlatformJpa;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PlatformPersistence implements PlatformRepositoryPort {
@@ -35,5 +36,14 @@ public class PlatformPersistence implements PlatformRepositoryPort {
     public Platform save(Platform platform) {
         PlatformEntity saved = platformRepository.save(mapper.toEntity(platform));
         return mapper.toDomain(saved);
+    }
+    @Override
+    public Optional<Platform> update(Integer id, Platform platform) {
+        return platformRepository.findById(id).map(entity -> {
+            entity.setPlatformName(platform.getName());
+            entity.setPlatformCompany(platform.getCompany());
+            entity.setPlatformYear(platform.getYear());
+            return mapper.toDomain(entity);
+        });
     }
 }

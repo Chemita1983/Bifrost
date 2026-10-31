@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlatformApplicationService implements PlatformUseCase {
@@ -33,5 +34,10 @@ public class PlatformApplicationService implements PlatformUseCase {
     @Transactional
     public Platform create(Platform platform) {
         return platformRepository.save(platform);
+    }
+    @Override
+    @Transactional
+    public Optional<Platform> update(Integer id, Platform platform) {
+        return platformRepository.update(id, platform);
     }
 }

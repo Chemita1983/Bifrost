@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DigitalPlatformApplicationService implements DigitalPlatformUseCase {
@@ -27,5 +28,10 @@ public class DigitalPlatformApplicationService implements DigitalPlatformUseCase
     @Transactional
     public DigitalPlatform create(DigitalPlatform digitalPlatform) {
         return digitalPlatformJpa.save(digitalPlatform);
+    }
+    @Override
+    @Transactional
+    public Optional<DigitalPlatform> update(Integer id, DigitalPlatform digitalPlatform) {
+        return digitalPlatformJpa.update(id, digitalPlatform);
     }
 }
