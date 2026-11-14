@@ -11,6 +11,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Removed
 
+- The one-time `database/migrations/20261031_hours_and_sequences.sql` script, already applied to the personal
+  database and not needed for new ones. It remains available in the git history (commit `30bd615`).
 - Unused Thymeleaf dependency and the unprocessed `static/index.html` page.
 - Explicit Lombok version; the version managed by Spring Boot is used.
 

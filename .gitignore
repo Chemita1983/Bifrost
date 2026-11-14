@@ -29,3 +29,4 @@ src/main/resources/application.properties
 ### Docker / secrets ###
 .env
 bifrost.env
+.claude/settings.local.json
