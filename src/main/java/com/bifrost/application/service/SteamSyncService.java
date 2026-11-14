@@ -14,12 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Imports the Steam library: games are matched by their Steam application ID.
- * New games are created; existing games only get their hours updated. Nothing is ever deleted.
+ * New games are created (apps that are not games are skipped); existing games only get their hours
+ * updated. Nothing is ever deleted.
  */
 @Service
 public class SteamSyncService implements SteamSyncUseCase {
@@ -45,22 +47,28 @@ public class SteamSyncService implements SteamSyncUseCase {
         Map<Integer, Videogame> collection = videogameRepository.findSteamGames().stream()
                 .collect(Collectors.toMap(Videogame::getSteamAppId, Function.identity()));
 
-        // 1. Decide what changes.
-        List<OwnedGame> newGames = steamGames.stream()
+        // 1. Decide what changes. Only new apps are checked in the store: existing ones were already accepted.
+        List<OwnedGame> newApps = steamGames.stream()
                 .filter(game -> !collection.containsKey(game.appId()))
                 .toList();
+        Set<Integer> nonGames = newApps.isEmpty() ? Set.of()
+                : steamLibrary.findNonGames(newApps.stream().map(OwnedGame::appId).toList());
+        List<OwnedGame> newGames = newApps.stream()
+                .filter(game -> !nonGames.contains(game.appId()))
+                .toList();
+        int skipped = newApps.size() - newGames.size();
         List<OwnedGame> gamesWithNewHours = steamGames.stream()
                 .filter(game -> collection.containsKey(game.appId()))
                 .filter(game -> !Objects.equals(collection.get(game.appId()).getHoursPlayed(), hoursPlayed(game)))
                 .toList();
-        int unchanged = steamGames.size() - newGames.size() - gamesWithNewHours.size();
+        int unchanged = steamGames.size() - newApps.size() - gamesWithNewHours.size();
 
         // 2. Apply the changes, unless it is only a preview.
         if (!dryRun) {
             newGames.forEach(game -> videogameRepository.save(newVideogame(game)));
             gamesWithNewHours.forEach(game -> updateHours(collection.get(game.appId()).getId(), hoursPlayed(game)));
         }
-        return new Result(newGames.size(), gamesWithNewHours.size(), unchanged, dryRun);
+        return new Result(newGames.size(), gamesWithNewHours.size(), unchanged, skipped, dryRun);
     }
 
     /** Steam reports minutes; partial hours are rounded down. */

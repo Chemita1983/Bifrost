@@ -23,6 +23,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -207,15 +208,18 @@ class BifrostApplicationTests {
         jdbc.update("INSERT INTO platform (id, platform_name) VALUES (?, 'PC')", STEAM_IDS);
         jdbc.update("INSERT INTO digital_platform (id, digital_platform_name) VALUES (?, 'Steam')", STEAM_IDS);
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(
-                new OwnedGame(620, "Portal 2", 754), new OwnedGame(400, "Portal", 0)));
+                new OwnedGame(620, "Portal 2", 754), new OwnedGame(400, "Portal", 0),
+                new OwnedGame(431960, "Wallpaper Engine", 300)));
+        when(steamLibrary.findNonGames(org.mockito.ArgumentMatchers.anyList())).thenReturn(Set.of(431960));
 
         mvc.perform(post("/steam/sync").param("dryRun", "true"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"dryRun\":true}", true));
+                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"skipped\":1,\"dryRun\":true}", true));
         org.assertj.core.api.Assertions.assertThat(games.count()).isZero();
 
         mvc.perform(post("/steam/sync"))
-                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"dryRun\":false}", true));
+                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"skipped\":1,\"dryRun\":false}", true));
+        mvc.perform(get("/videogame").param("name", "Wallpaper")).andExpect(content().json("[]"));
         int portal2 = json.readTree(mvc.perform(get("/videogame").param("name", "Portal 2"))
                         .andExpect(jsonPath("$[0].steamAppId").value(620))
                         .andExpect(jsonPath("$[0].hoursPlayed").value(12))
@@ -234,9 +238,10 @@ class BifrostApplicationTests {
                 .andExpect(status().isBadRequest());
 
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(
-                new OwnedGame(620, "Portal 2", 900), new OwnedGame(400, "Portal", 0)));
+                new OwnedGame(620, "Portal 2", 900), new OwnedGame(400, "Portal", 0),
+                new OwnedGame(431960, "Wallpaper Engine", 400)));
         mvc.perform(post("/steam/sync"))
-                .andExpect(content().json("{\"created\":0,\"updated\":1,\"unchanged\":1,\"dryRun\":false}", true));
+                .andExpect(content().json("{\"created\":0,\"updated\":1,\"unchanged\":1,\"skipped\":1,\"dryRun\":false}", true));
         org.assertj.core.api.Assertions.assertThat(games.count()).isEqualTo(2);
         mvc.perform(get("/videogame").param("name", "Portal 2"))
                 .andExpect(jsonPath("$[0].hoursPlayed").value(15))

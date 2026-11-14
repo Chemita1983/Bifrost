@@ -8,10 +8,15 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -98,7 +103,54 @@ class SteamApiClientTest {
         steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/")))
                 .andRespond(withException(new IOException("connection refused")));
         assertThatThrownBy(client::getOwnedGames)
-                .hasMessage("Could not read the Steam library")
+                .hasMessage("Could not connect to Steam when reading the library")
                 .hasNoCause();
+    }
+
+    @Test
+    void findNonGamesAsksTheStoreWithoutTheApiKeyAndKeepsUnknownApps() {
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/IStoreBrowseService/GetItems/v1/")))
+                .andExpect(method(GET))
+                .andExpect(request -> {
+                    String query = URLDecoder.decode(request.getURI().getRawQuery(), StandardCharsets.UTF_8);
+                    assertThat(query).isEqualTo("input_json={\"ids\":[{\"appid\":620},{\"appid\":431960},"
+                            + "{\"appid\":2778580},{\"appid\":211}],\"context\":{\"country_code\":\"ES\"}}");
+                    assertThat(query).doesNotContain(KEY);
+                })
+                // Real Steam format: games are type 0, software 6, DLC 4; unknown apps come back without data.
+                .andRespond(withSuccess("""
+                        {"response":{"store_items":[
+                          {"item_type":0,"id":620,"success":1,"visible":true,"name":"Portal 2","appid":620,"type":0},
+                          {"item_type":0,"id":431960,"success":1,"visible":true,"name":"Wallpaper Engine","appid":431960,"type":6},
+                          {"item_type":0,"id":2778580,"success":1,"visible":true,"appid":2778580,"type":4},
+                          {"success":15,"visible":false}]}}
+                        """, MediaType.APPLICATION_JSON));
+
+        assertThat(client.findNonGames(List.of(620, 431960, 2778580, 211))).containsExactlyInAnyOrder(431960, 2778580);
+        steam.verify();
+    }
+
+    @Test
+    void findNonGamesAsksInBatchesOf100() {
+        List<Integer> appIds = IntStream.rangeClosed(1, 150).boxed().toList();
+        steam.expect(times(2), requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/IStoreBrowseService/")))
+                .andRespond(withSuccess("{\"response\":{\"store_items\":[{\"appid\":1,\"type\":6}]}}", MediaType.APPLICATION_JSON));
+
+        assertThat(client.findNonGames(appIds)).containsExactly(1);
+        steam.verify();
+    }
+
+    @Test
+    void storeErrorsStopTheSync() {
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/IStoreBrowseService/")))
+                .andRespond(withSuccess("{\"response\":{}}", MediaType.APPLICATION_JSON));
+        assertThatThrownBy(() -> client.findNonGames(List.of(620)))
+                .hasMessage("Steam did not return the store information of the games");
+
+        steam.reset();
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/IStoreBrowseService/")))
+                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+        assertThatThrownBy(() -> client.findNonGames(List.of(620)))
+                .hasMessageStartingWith("Steam returned HTTP 503 when reading the store information");
     }
 }

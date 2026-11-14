@@ -22,17 +22,17 @@ class SteamSyncControllerTest {
 
     @Test
     void syncReturnsTheSummaryAndSavesByDefault() throws Exception {
-        when(useCase.sync(false)).thenReturn(new SteamSyncUseCase.Result(3, 2, 1, false));
+        when(useCase.sync(false)).thenReturn(new SteamSyncUseCase.Result(3, 2, 1, 4, false));
 
         mvc.perform(post("/steam/sync"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"created\":3,\"updated\":2,\"unchanged\":1,\"dryRun\":false}", true));
+                .andExpect(content().json("{\"created\":3,\"updated\":2,\"unchanged\":1,\"skipped\":4,\"dryRun\":false}", true));
         verify(useCase).sync(false);
     }
 
     @Test
     void dryRunIsPassedToTheUseCase() throws Exception {
-        when(useCase.sync(true)).thenReturn(new SteamSyncUseCase.Result(3, 0, 0, true));
+        when(useCase.sync(true)).thenReturn(new SteamSyncUseCase.Result(3, 0, 0, 0, true));
 
         mvc.perform(post("/steam/sync").param("dryRun", "true"))
                 .andExpect(status().isOk())

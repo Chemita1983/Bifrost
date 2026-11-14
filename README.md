@@ -181,6 +181,11 @@ cannot be deleted and returns 409; existing games are preserved.
 
 - Steam games that are not in the collection are created as digital PC games
   from the Steam store, with their name and hours played.
+- Apps that the Steam store identifies as something other than a game, such as
+  software, DLC or demos, are skipped. Apps unknown to the store, for example
+  games no longer sold, are imported. Only new apps are checked, through
+  `IStoreBrowseService/GetItems`, which works in Steam's public Web API but is
+  not part of its official documentation.
 - Games already imported only get their `hoursPlayed` updated. Completion,
   platinum, type, year, company and every other field entered manually are kept.
 - Nothing is ever deleted, even if a game is no longer in the Steam library.
@@ -189,7 +194,7 @@ cannot be deleted and returns 409; existing games are preserved.
 - Hours are Steam minutes divided by 60, rounded down.
 
 `POST /steam/sync?dryRun=true` returns the same summary without saving anything.
-The response is `{"created": 3, "updated": 1, "unchanged": 40, "dryRun": false}`.
+The response is `{"created": 3, "updated": 1, "unchanged": 40, "skipped": 2, "dryRun": false}`.
 
 Configure the account with environment variables; never commit their values:
 

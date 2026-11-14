@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ class SteamSyncServiceTest {
 
         Result result = service.sync(false);
 
-        assertThat(result).isEqualTo(new Result(1, 1, 1, false));
+        assertThat(result).isEqualTo(new Result(1, 1, 1, 0, false));
         ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
         verify(repository).save(created.capture());
         Videogame game = created.getValue();
@@ -68,7 +69,7 @@ class SteamSyncServiceTest {
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 0), new OwnedGame(20, "Old", 120)));
         when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, null)));
 
-        assertThat(service.sync(true)).isEqualTo(new Result(1, 1, 0, true));
+        assertThat(service.sync(true)).isEqualTo(new Result(1, 1, 0, 0, true));
 
         verify(repository, never()).save(any());
         verify(repository, never()).update(anyInt(), any());
@@ -84,7 +85,7 @@ class SteamSyncServiceTest {
             return Optional.of(patch.apply(stored));
         });
 
-        assertThat(service.sync(false)).isEqualTo(new Result(1, 1, 0, false));
+        assertThat(service.sync(false)).isEqualTo(new Result(1, 1, 0, 0, false));
 
         ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
         verify(repository).save(created.capture());
@@ -100,6 +101,31 @@ class SteamSyncServiceTest {
 
         verify(repository, never()).findSteamGames();
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void appsThatAreNotGamesAreSkippedAndOnlyNewAppsAreCheckedInTheStore() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(
+                new OwnedGame(620, "Portal 2", 60), new OwnedGame(431960, "Wallpaper Engine", 600),
+                new OwnedGame(400, "Portal", 0)));
+        when(repository.findSteamGames()).thenReturn(List.of(steamGame(1, 400, 0)));
+        when(steamLibrary.findNonGames(List.of(620, 431960))).thenReturn(Set.of(431960));
+
+        assertThat(service.sync(false)).isEqualTo(new Result(1, 0, 1, 1, false));
+
+        ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
+        verify(repository).save(created.capture());
+        assertThat(created.getValue().getSteamAppId()).isEqualTo(620);
+    }
+
+    @Test
+    void theStoreIsNotAskedWhenThereAreNoNewApps() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(400, "Portal", 0)));
+        when(repository.findSteamGames()).thenReturn(List.of(steamGame(1, 400, 0)));
+
+        assertThat(service.sync(false)).isEqualTo(new Result(0, 0, 1, 0, false));
+
+        verify(steamLibrary, never()).findNonGames(any());
     }
 
     private static Videogame steamGame(int id, int appId, Integer hours) {
