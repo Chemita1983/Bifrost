@@ -63,7 +63,16 @@ class ApiExceptionHandlerTest {
         assertThat(conflict.getBody()).containsEntry("message", "Resource is in use");
         assertThat(handler.status(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "secret"))
                 .getBody()).containsEntry("message", "Internal server error");
-        assertThat(handler.malformedBody().getBody()).containsEntry("message", "Invalid request body");
+        assertThat(handler.malformedBody(mock(org.springframework.http.converter.HttpMessageNotReadableException.class))
+                .getBody()).containsEntry("message", "Invalid request body");
+    }
+
+    @Test
+    void integrityViolationReturnsConflictWithoutDatabaseDetails() {
+        var response = handler.conflict(
+                new org.springframework.dao.DataIntegrityViolationException("FK constraint secret"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).containsOnlyKeys("message").containsEntry("message", "Resource is in use");
     }
 
     @Test

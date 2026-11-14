@@ -15,75 +15,32 @@ public class PersistenceMapper {
         if (entity == null) {
             return null;
         }
-        return new Platform(entity.getId(), entity.getPlatformName(),
-                entity.getPlatformCompany(), entity.getPlatformYear());
-    }
-
-    public PlatformEntity toEntity(Platform platform) {
-        if (platform == null) {
-            return null;
-        }
-        PlatformEntity entity = new PlatformEntity();
-        setId(entity, platform.getId());
-        entity.setPlatformName(platform.getName());
-        entity.setPlatformCompany(platform.getCompany());
-        entity.setPlatformYear(platform.getYear());
-        return entity;
+        return new Platform(entity.getId(), entity.getPlatformName(), entity.getPlatformCompany(),
+                entity.getPlatformYear());
     }
 
     public DigitalPlatform toDomain(DigitalPlatformEntity entity) {
         if (entity == null) {
             return null;
         }
-        return new DigitalPlatform(entity.getId(), entity.getDigitalPlatformName(),
-                entity.getDigitalPlatformCompany());
-    }
-
-    public DigitalPlatformEntity toEntity(DigitalPlatform digitalPlatform) {
-        if (digitalPlatform == null) {
-            return null;
-        }
-        DigitalPlatformEntity entity = new DigitalPlatformEntity();
-        setId(entity, digitalPlatform.getId());
-        entity.setDigitalPlatformName(digitalPlatform.getName());
-        entity.setDigitalPlatformCompany(digitalPlatform.getCompany());
-        return entity;
+        return new DigitalPlatform(entity.getId(), entity.getDigitalPlatformName(), entity.getDigitalPlatformCompany());
     }
 
     public Videogame toDomain(VideogameEntity entity) {
         if (entity == null) {
             return null;
         }
-        Videogame videogame = new Videogame(entity.getId(), entity.getVideogameName(), entity.getVideogameType(),
+        return new Videogame(entity.getId(), entity.getVideogameName(), entity.getVideogameType(),
                 entity.getVideogameYear(), toDomain(entity.getPlatformEntity()),
-                toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(),
-                entity.getIsDigital(), entity.getIsCompleted(), entity.getIsPlatinum(),
-                entity.isMultiplayer());
-        videogame.setHoursPlayed(entity.getHoursPlayed());
-        return videogame;
+                toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(), entity.getIsDigital(),
+                entity.getIsCompleted(), entity.getIsPlatinum(), entity.isMultiplayer(), entity.getHoursPlayed());
     }
 
-    public VideogameEntity toEntity(Videogame videogame) {
-        if (videogame == null) {
-            return null;
-        }
-        VideogameEntity entity = new VideogameEntity();
-        setId(entity, videogame.getId());
-        entity.setVideogameName(videogame.getName());
-        entity.setVideogameType(videogame.getType());
-        entity.setVideogameYear(videogame.getYear());
-        entity.setPlatformEntity(toEntity(videogame.getPlatform()));
-        entity.setDigitalPlatformEntity(toEntity(videogame.getDigitalPlatform()));
-        entity.setCompanyName(videogame.getCompanyName());
-        entity.setIsDigital(videogame.getDigital());
-        entity.setIsCompleted(videogame.getCompleted());
-        entity.setIsPlatinum(videogame.getPlatinum());
-        entity.setMultiplayer(videogame.isMultiplayer());
-        entity.setHoursPlayed(videogame.getHoursPlayed());
-        return entity;
-    }
+    /*
+     * The following methods copy the domain values into a new or managed entity.
+     * The entity ID is never changed: Hibernate generates it.
+     */
 
-    /** Updates managed entities without replacing their identifiers or managed relations. */
     public void updateEntity(Platform source, PlatformEntity target) {
         target.setPlatformName(source.getName());
         target.setPlatformCompany(source.getCompany());
@@ -108,11 +65,5 @@ public class PersistenceMapper {
         target.setHoursPlayed(source.getHoursPlayed());
         target.setPlatformEntity(platform);
         target.setDigitalPlatformEntity(digitalPlatform);
-    }
-
-    private void setId(com.bifrost.infrastructure.persistence.entity.BifrostEntity entity, Integer id) {
-        if (id != null) {
-            entity.setId(id);
-        }
     }
 }

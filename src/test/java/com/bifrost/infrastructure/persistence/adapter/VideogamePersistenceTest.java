@@ -3,6 +3,7 @@ package com.bifrost.infrastructure.persistence.adapter;
 import com.bifrost.domain.Videogame;
 import com.bifrost.domain.Platform;
 import com.bifrost.domain.DigitalPlatform;
+import com.bifrost.infrastructure.persistence.entity.DigitalPlatformEntity;
 import com.bifrost.infrastructure.persistence.entity.PlatformEntity;
 import org.springframework.web.server.ResponseStatusException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,18 +48,6 @@ class VideogamePersistenceTest {
     }
 
     @Test
-    void shouldFindAllVideogames() {
-        VideogameEntity entity = new VideogameEntity();
-        List<VideogameEntity> videogames = List.of(entity);
-        when(videogamesRepository.findAll()).thenReturn(videogames);
-
-        List<Videogame> result = adapter.findAll();
-
-        assertThat(result).hasSize(1);
-        verify(videogamesRepository).findAll();
-    }
-
-    @Test
     void filteredSearchConvertsFlagsAndMapsMockedRepositoryResults() {
         when(videogamesRepository.findFiltered(5, 0, 1, false, "Shooter"))
                 .thenReturn(List.of(new VideogameEntity()));
@@ -80,17 +69,30 @@ class VideogamePersistenceTest {
     }
 
     @Test
-    void shouldSaveVideogame() {
+    void shouldSaveVideogameWithResolvedRelationsAndWithoutId() {
         Videogame videogame = new Videogame();
+        videogame.setId(99);
+        videogame.setName("Zelda");
+        videogame.setDigital(1);
+        videogame.setHoursPlayed(10);
         videogame.setPlatform(new Platform(1, null, null, null));
-        when(platformRepository.findById(1)).thenReturn(Optional.of(new PlatformEntity()));
-        when(videogamesRepository.save(org.mockito.ArgumentMatchers.any(VideogameEntity.class)))
-                .thenReturn(new VideogameEntity());
+        videogame.setDigitalPlatform(new DigitalPlatform(2, null, null));
+        PlatformEntity platform = new PlatformEntity();
+        DigitalPlatformEntity store = new DigitalPlatformEntity();
+        when(platformRepository.findById(1)).thenReturn(Optional.of(platform));
+        when(digitalPlatformJpa.findById(2)).thenReturn(Optional.of(store));
+        when(videogamesRepository.save(any(VideogameEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Videogame result = adapter.save(videogame);
 
-        assertThat(result).isNotNull();
-        verify(videogamesRepository).save(org.mockito.ArgumentMatchers.any(VideogameEntity.class));
+        var saved = org.mockito.ArgumentCaptor.forClass(VideogameEntity.class);
+        verify(videogamesRepository).save(saved.capture());
+        assertThat(saved.getValue().getId()).isNull();
+        assertThat(saved.getValue().getVideogameName()).isEqualTo("Zelda");
+        assertThat(saved.getValue().getHoursPlayed()).isEqualTo(10);
+        assertThat(saved.getValue().getPlatformEntity()).isSameAs(platform);
+        assertThat(saved.getValue().getDigitalPlatformEntity()).isSameAs(store);
+        assertThat(result.getName()).isEqualTo("Zelda");
     }
     @Test
     void saveRejectsMissingAndUnknownRelationsBeforeSaving() {

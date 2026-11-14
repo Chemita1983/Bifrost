@@ -1,7 +1,11 @@
 package com.bifrost.infrastructure.mapper;
 
 import com.bifrost.domain.DigitalPlatform;
+import com.bifrost.domain.Platform;
+import com.bifrost.domain.Videogame;
 import com.bifrost.infrastructure.persistence.entity.DigitalPlatformEntity;
+import com.bifrost.infrastructure.persistence.entity.PlatformEntity;
+import com.bifrost.infrastructure.persistence.entity.VideogameEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,23 +29,36 @@ class PersistenceMapperTest {
     }
 
     @Test
-    void shouldMapDigitalPlatformDomainToEntity() {
-        DigitalPlatform platform = new DigitalPlatform(1, "Steam", "Valve");
+    void nullEntitiesMapToNull() {
+        assertThat(mapper.toDomain((PlatformEntity) null)).isNull();
+        assertThat(mapper.toDomain((DigitalPlatformEntity) null)).isNull();
+        assertThat(mapper.toDomain((VideogameEntity) null)).isNull();
+    }
 
-        DigitalPlatformEntity result = mapper.toEntity(platform);
+    @Test
+    void updatePlatformsCopiesValuesButNeverTheId() {
+        PlatformEntity platform = new PlatformEntity();
+        platform.setId(7);
+        mapper.updateEntity(new Platform(99, "Switch", "Nintendo", "2017"), platform);
+        assertThat(platform.getId()).isEqualTo(7);
+        assertThat(platform.getPlatformName()).isEqualTo("Switch");
+        assertThat(platform.getPlatformCompany()).isEqualTo("Nintendo");
+        assertThat(platform.getPlatformYear()).isEqualTo("2017");
 
-        assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getDigitalPlatformName()).isEqualTo("Steam");
-        assertThat(result.getDigitalPlatformCompany()).isEqualTo("Valve");
+        DigitalPlatformEntity store = new DigitalPlatformEntity();
+        mapper.updateEntity(new DigitalPlatform(99, "Steam", "Valve"), store);
+        assertThat(store.getId()).isNull();
+        assertThat(store.getDigitalPlatformName()).isEqualTo("Steam");
+        assertThat(store.getDigitalPlatformCompany()).isEqualTo("Valve");
     }
 
     @Test
     void updateKeepsManagedIdAndUsesResolvedRelations() {
-        var target = new com.bifrost.infrastructure.persistence.entity.VideogameEntity();
+        var target = new VideogameEntity();
         target.setId(7);
-        var platform = new com.bifrost.infrastructure.persistence.entity.PlatformEntity();
+        var platform = new PlatformEntity();
         var store = new DigitalPlatformEntity();
-        var source = new com.bifrost.domain.Videogame();
+        var source = new Videogame();
         source.setId(99);
         source.setName("Updated");
         source.setHoursPlayed(0);
@@ -60,13 +77,14 @@ class PersistenceMapperTest {
 
     @Test
     void mapsVideogameHoursInBothDirections() {
-        var entity = new com.bifrost.infrastructure.persistence.entity.VideogameEntity();
         for (Integer hours : new Integer[] {null, 0, 42}) {
+            var entity = new VideogameEntity();
             entity.setHoursPlayed(hours);
             var domain = mapper.toDomain(entity);
             assertThat(domain.getHoursPlayed()).isEqualTo(hours);
-            assertThat(mapper.toEntity(domain).getHoursPlayed()).isEqualTo(hours);
+            var copy = new VideogameEntity();
+            mapper.updateEntity(domain, copy, null, null);
+            assertThat(copy.getHoursPlayed()).isEqualTo(hours);
         }
     }
-
 }

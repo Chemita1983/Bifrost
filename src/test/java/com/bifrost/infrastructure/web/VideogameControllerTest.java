@@ -41,12 +41,12 @@ class VideogameControllerTest {
 
     @Test
     void shouldGetAllVideogames() {
-        when(videogameUseCase.getAll()).thenReturn(List.of(new Videogame()));
+        when(videogameUseCase.getFiltered(null, null, null, null, null)).thenReturn(List.of(new Videogame()));
 
         List<VideogameResponse> result = controller.getVideogames(null, null, null, null, null);
 
         assertThat(result).hasSize(1);
-        verify(videogameUseCase).getAll();
+        verify(videogameUseCase).getFiltered(null, null, null, null, null);
     }
 
     @Test
@@ -79,7 +79,7 @@ class VideogameControllerTest {
 
         VideogameResponse result = controller.addVideogame(
                 new VideogameRequest("Mario", "Platform", "2020", null, null,
-                        "Nintendo", 0, 0, 0, false));
+                        "Nintendo", 0, 0, 0, false, null));
 
         assertThat(result).isNotNull();
         verify(videogameUseCase).create(any(Videogame.class));
@@ -87,7 +87,7 @@ class VideogameControllerTest {
 
     @Test
     void shouldUpdateVideogame() {
-        Videogame current = new Videogame(1, "Mario", "Platform", "2020", null, null, "Nintendo", 0, 0, 0, false);
+        Videogame current = new Videogame(1, "Mario", "Platform", "2020", null, null, "Nintendo", 0, 0, 0, false, null);
         when(videogameUseCase.update(eq(1), any())).thenAnswer(invocation -> {
             UnaryOperator<Videogame> update = invocation.getArgument(1);
             return Optional.of(update.apply(current));

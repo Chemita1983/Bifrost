@@ -13,6 +13,8 @@ public interface PlatformRepositoryPort {
     List<Platform> findByNameContaining(String name);
 
     Platform save(Platform platform);
+
     Optional<Platform> update(Integer id, UnaryOperator<Platform> patch);
+
     boolean delete(Integer id);
 }

@@ -14,6 +14,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebMapper {
 
+    public Platform toDomain(PlatformRequest request) {
+        return new Platform(null, request.platformName(), request.platformCompany(), request.platformYear());
+    }
+
+    public DigitalPlatform toDomain(DigitalPlatformRequest request) {
+        return new DigitalPlatform(null, request.digitalPlatformName(), request.digitalPlatformCompany());
+    }
+
+    public Videogame toDomain(VideogameRequest request) {
+        Platform platform = request.platformId() == null ? null
+                : new Platform(request.platformId(), null, null, null);
+        DigitalPlatform digitalPlatform = request.digitalPlatformId() == null ? null
+                : new DigitalPlatform(request.digitalPlatformId(), null, null);
+        return new Videogame(null, request.videogameName(), request.videogameType(), request.videogameYear(),
+                platform, digitalPlatform, request.companyName(), request.isDigital(), request.isCompleted(),
+                request.isPlatinum(), request.multiplayer(), request.hoursPlayed());
+    }
+
+    /** Used by PATCH to merge the received fields into the current values. */
     public PlatformRequest toRequest(Platform platform) {
         return new PlatformRequest(platform.getName(), platform.getCompany(), platform.getYear());
     }
@@ -26,40 +45,23 @@ public class WebMapper {
         return new VideogameRequest(game.getName(), game.getType(), game.getYear(),
                 game.getPlatform() == null ? null : game.getPlatform().getId(),
                 game.getDigitalPlatform() == null ? null : game.getDigitalPlatform().getId(),
-                game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(), game.isMultiplayer(),
-                game.getHoursPlayed());
-    }
-
-    public Platform toDomain(PlatformRequest request) {
-        return new Platform(null, request.platformName(), request.platformCompany(), request.platformYear());
+                game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(),
+                game.isMultiplayer(), game.getHoursPlayed());
     }
 
     public PlatformResponse toResponse(Platform platform) {
-        return PlatformResponse.from(platform);
+        return new PlatformResponse(platform.getId(), platform.getName(), platform.getCompany(), platform.getYear());
     }
 
-    public DigitalPlatform toDomain(DigitalPlatformRequest request) {
-        return new DigitalPlatform(null, request.digitalPlatformName(), request.digitalPlatformCompany());
+    public DigitalPlatformResponse toResponse(DigitalPlatform platform) {
+        return new DigitalPlatformResponse(platform.getId(), platform.getName(), platform.getCompany());
     }
 
-    public DigitalPlatformResponse toResponse(DigitalPlatform digitalPlatform) {
-        return DigitalPlatformResponse.from(digitalPlatform);
-    }
-
-    public Videogame toDomain(VideogameRequest request) {
-        Platform platform = request.platformId() == null ? null
-                : new Platform(request.platformId(), null, null, null);
-        DigitalPlatform digitalPlatform = request.digitalPlatformId() == null ? null
-                : new DigitalPlatform(request.digitalPlatformId(), null, null);
-
-        Videogame videogame = new Videogame(null, request.videogameName(), request.videogameType(),
-                request.videogameYear(), platform, digitalPlatform, request.companyName(),
-                request.isDigital(), request.isCompleted(), request.isPlatinum(), request.multiplayer());
-        videogame.setHoursPlayed(request.hoursPlayed());
-        return videogame;
-    }
-
-    public VideogameResponse toResponse(Videogame videogame) {
-        return VideogameResponse.from(videogame);
+    public VideogameResponse toResponse(Videogame game) {
+        return new VideogameResponse(game.getId(), game.getName(), game.getType(), game.getYear(),
+                game.getPlatform() == null ? null : toResponse(game.getPlatform()),
+                game.getDigitalPlatform() == null ? null : toResponse(game.getDigitalPlatform()),
+                game.getCompanyName(), game.getDigital() == 1, game.getCompleted() == 1,
+                game.getPlatinum() == 1, game.isMultiplayer(), game.getHoursPlayed());
     }
 }

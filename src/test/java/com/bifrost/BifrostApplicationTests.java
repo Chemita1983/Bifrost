@@ -74,6 +74,8 @@ class BifrostApplicationTests {
                 .andExpect(jsonPath("$[0].platform.id").value(platform))
                 .andExpect(jsonPath("$[0].digitalPlatform.id").value(digital))
                 .andExpect(jsonPath("$[0].hoursPlayed").value(0));
+        mvc.perform(get("/videogames"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
         mvc.perform(get("/videogames").param("platformId", String.valueOf(platform))
                         .param("isDigital", "false").param("isCompleted", "false")
                         .param("multiplayer", "false").param("type", "rpg"))

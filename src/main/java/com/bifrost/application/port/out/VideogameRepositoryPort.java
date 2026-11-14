@@ -8,13 +8,15 @@ import java.util.function.UnaryOperator;
 
 public interface VideogameRepositoryPort {
 
-    List<Videogame> findAll();
-
-    List<Videogame> findFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type);
+    /** Null filters are ignored, so passing only nulls returns every videogame. */
+    List<Videogame> findFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer,
+                                 String type);
 
     List<Videogame> findByNameContaining(String name);
 
     Videogame save(Videogame videogame);
+
     Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
+
     boolean delete(Integer id);
 }

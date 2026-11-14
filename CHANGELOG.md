@@ -9,6 +9,11 @@ All notable changes to Bifröst will be documented in this file.
 
 - Return HTTP 400 for invalid path or query parameter types instead of HTTP 500.
 
+### Removed
+
+- Unused Thymeleaf dependency and the unprocessed `static/index.html` page.
+- Explicit Lombok version; the version managed by Spring Boot is used.
+
 ### Added
 
 - MariaDB 11.4 Testcontainers integration tests covering API operations, filters,
@@ -26,7 +31,9 @@ All notable changes to Bifröst will be documented in this file.
 
 - Return a generic message for unexpected server errors while preserving Spring HTTP error statuses and headers.
 - Require existing videogame platforms and digital platforms for digital games on create and merged updates; reject invalid relations with HTTP 400.
-
+- PATCH and DELETE return the same 404 messages: `Videogame not found`, `Platform not found` and `Digital platform not found`.
+- Simplified the code without changing the API: Lombok domain classes, one place for each mapping, a single
+  path for listing video games with or without filters, and the 409 conflict handled by the exception handler.
 - The Spring Boot test uses a disposable database with `create-drop` rather than
   the application's configured datasource; Docker is required for the full suite.
 - Platform and digital store identifiers are included in API responses to support updates.
