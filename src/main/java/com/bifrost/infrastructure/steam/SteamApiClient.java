@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 @Component
 public class SteamApiClient implements SteamLibraryPort {
 
-    /** Type of the store items that are games; others are software, DLC, demos... */
-    private static final int GAME_TYPE = 0;
+    /** Store type of software, such as Wallpaper Engine. Games (0), DLC (4) and other types are imported. */
+    private static final int SOFTWARE_TYPE = 6;
     private static final int STORE_BATCH_SIZE = 100;
 
     private final RestClient restClient;
@@ -64,8 +64,8 @@ public class SteamApiClient implements SteamLibraryPort {
 
     /** Asks the Steam store (IStoreBrowseService/GetItems) for the type of the apps, in batches. */
     @Override
-    public Set<Integer> findNonGames(List<Integer> appIds) {
-        Set<Integer> nonGames = new HashSet<>();
+    public Set<Integer> findSoftware(List<Integer> appIds) {
+        Set<Integer> software = new HashSet<>();
         for (int start = 0; start < appIds.size(); start += STORE_BATCH_SIZE) {
             List<Integer> batch = appIds.subList(start, Math.min(start + STORE_BATCH_SIZE, appIds.size()));
             // The store needs a country; apps not sold there are unknown and therefore imported.
@@ -78,10 +78,10 @@ public class SteamApiClient implements SteamLibraryPort {
                 throw new IllegalStateException("Steam did not return the store information of the games");
             }
             body.response().storeItems().stream()
-                    .filter(item -> item.type() != null && item.type() != GAME_TYPE)
-                    .forEach(item -> nonGames.add(item.appId()));
+                    .filter(item -> item.type() != null && item.type() == SOFTWARE_TYPE)
+                    .forEach(item -> software.add(item.appId()));
         }
-        return nonGames;
+        return software;
     }
 
     private <T> T call(String action, Function<UriBuilder, URI> uri, Class<T> responseType) {

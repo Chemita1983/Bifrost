@@ -9,10 +9,10 @@ public interface SteamLibraryPort {
     List<OwnedGame> getOwnedGames();
 
     /**
-     * Returns the app IDs that the Steam store identifies as something other than a game
-     * (software, DLC, demos...). Apps unknown to the store are not included.
+     * Returns the app IDs that the Steam store identifies as software, such as Wallpaper Engine.
+     * Apps unknown to the store are not included.
      */
-    Set<Integer> findNonGames(List<Integer> appIds);
+    Set<Integer> findSoftware(List<Integer> appIds);
 
     record OwnedGame(int appId, String name, int minutesPlayed) {
     }

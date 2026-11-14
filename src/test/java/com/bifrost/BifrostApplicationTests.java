@@ -210,7 +210,7 @@ class BifrostApplicationTests {
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(
                 new OwnedGame(620, "Portal 2", 754), new OwnedGame(400, "Portal", 0),
                 new OwnedGame(431960, "Wallpaper Engine", 300)));
-        when(steamLibrary.findNonGames(org.mockito.ArgumentMatchers.anyList())).thenReturn(Set.of(431960));
+        when(steamLibrary.findSoftware(org.mockito.ArgumentMatchers.anyList())).thenReturn(Set.of(431960));
 
         mvc.perform(post("/steam/sync").param("dryRun", "true"))
                 .andExpect(status().isOk())

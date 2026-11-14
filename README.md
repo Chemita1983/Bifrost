@@ -181,9 +181,9 @@ cannot be deleted and returns 409; existing games are preserved.
 
 - Steam games that are not in the collection are created as digital PC games
   from the Steam store, with their name and hours played.
-- Apps that the Steam store identifies as something other than a game, such as
-  software, DLC or demos, are skipped. Apps unknown to the store, for example
-  games no longer sold, are imported. Only new apps are checked, through
+- Apps that the Steam store identifies as software, such as Wallpaper Engine,
+  are skipped. Games, DLC, other store types and apps unknown to the store, for
+  example games no longer sold, are imported. Only new apps are checked, through
   `IStoreBrowseService/GetItems`, which works in Steam's public Web API but is
   not part of its official documentation.
 - Games already imported only get their `hoursPlayed` updated. Completion,

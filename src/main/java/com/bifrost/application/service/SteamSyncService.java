@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * Imports the Steam library: games are matched by their Steam application ID.
- * New games are created (apps that are not games are skipped); existing games only get their hours
+ * New games are created (software is skipped); existing games only get their hours
  * updated. Nothing is ever deleted.
  */
 @Service
@@ -51,10 +51,10 @@ public class SteamSyncService implements SteamSyncUseCase {
         List<OwnedGame> newApps = steamGames.stream()
                 .filter(game -> !collection.containsKey(game.appId()))
                 .toList();
-        Set<Integer> nonGames = newApps.isEmpty() ? Set.of()
-                : steamLibrary.findNonGames(newApps.stream().map(OwnedGame::appId).toList());
+        Set<Integer> software = newApps.isEmpty() ? Set.of()
+                : steamLibrary.findSoftware(newApps.stream().map(OwnedGame::appId).toList());
         List<OwnedGame> newGames = newApps.stream()
-                .filter(game -> !nonGames.contains(game.appId()))
+                .filter(game -> !software.contains(game.appId()))
                 .toList();
         int skipped = newApps.size() - newGames.size();
         List<OwnedGame> gamesWithNewHours = steamGames.stream()

@@ -104,12 +104,12 @@ class SteamSyncServiceTest {
     }
 
     @Test
-    void appsThatAreNotGamesAreSkippedAndOnlyNewAppsAreCheckedInTheStore() {
+    void softwareIsSkippedAndOnlyNewAppsAreCheckedInTheStore() {
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(
                 new OwnedGame(620, "Portal 2", 60), new OwnedGame(431960, "Wallpaper Engine", 600),
                 new OwnedGame(400, "Portal", 0)));
         when(repository.findSteamGames()).thenReturn(List.of(steamGame(1, 400, 0)));
-        when(steamLibrary.findNonGames(List.of(620, 431960))).thenReturn(Set.of(431960));
+        when(steamLibrary.findSoftware(List.of(620, 431960))).thenReturn(Set.of(431960));
 
         assertThat(service.sync(false)).isEqualTo(new Result(1, 0, 1, 1, false));
 
@@ -125,7 +125,7 @@ class SteamSyncServiceTest {
 
         assertThat(service.sync(false)).isEqualTo(new Result(0, 0, 1, 0, false));
 
-        verify(steamLibrary, never()).findNonGames(any());
+        verify(steamLibrary, never()).findSoftware(any());
     }
 
     private static Videogame steamGame(int id, int appId, Integer hours) {
