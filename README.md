@@ -50,7 +50,8 @@ possible to know:
 - Which games are waiting to be started or completed.
 
 The application provides a REST API for managing the collection and can import
-the Steam library. Future work includes MCP integration for compatible AI clients.
+the Steam library. Future work includes an MCP server for compatible AI clients
+(see [Project status](#project-status)).
 
 ## Current features
 
@@ -269,8 +270,49 @@ mvn spring-boot:run
 
 ## Project status
 
-The project is currently under active development. The REST API, persistence
-and Steam synchronization are implemented; future work includes MCP integration.
+The project is currently under active development.
+
+### Done
+
+- REST API for video games, platforms and digital stores, with MariaDB
+  persistence and integration tests on disposable MariaDB (Testcontainers).
+- Steam library synchronization (`POST /steam/sync`): new games are created and
+  existing ones only get their hours updated. The sync writes only the
+  `hours_played` column, so data entered manually is never overwritten.
+- The Steam library of the personal collection has been imported, and the
+  company, type and year of every imported game were completed directly in the
+  database, with no code involved. The year is the **first release of the title
+  stored in the collection**, not the date Steam shows: *Trine* is 2009 even though
+  Steam now lists it as *Trine Enchanted Edition*, while *DOOM + DOOM II* is
+  2024 because that combined edition is a new release.
+- Console games (for example PlayStation 4) are added by hand: there is no
+  import for them.
+- A local, unversioned `backup_bifrost.sql` is regenerated and restored on a
+  disposable database after bulk data changes.
+
+### Pending
+
+- **New Steam games** are created with name and hours only. The Steam call does
+  not provide type, year or company, so they must be completed manually (or
+  with a later enrichment step; the Steam store details give the developer and
+  genres but not a reliable original year).
+- **Authentication:** the API has none, so it must only run locally.
+- **MCP server** (see below).
+- Delete the merged branches `feat/steam-sync` and `fix/steam-sync-hours-only`.
+
+### MCP integration (proposed)
+
+A small MCP server that wraps the existing REST API would let an AI client
+manage the collection with plain language instead of SQL scripts, for example
+"add Castlevania Requiem, PS4, digital, platinum" or "which games have I not
+completed?". It makes sense because it reuses the API and its validation, and it
+is far cheaper than writing and checking SQL for every change. Suggested scope:
+
+- Read tools: list and search games, filter by platform, status or type.
+- Write tools: create a game, patch a game (completion, platinum, hours) and
+  trigger `POST /steam/sync` (with `dryRun`).
+- **No delete tool**, and local use only (stdio transport) until the API has
+  authentication.
 
 ## License
 
