@@ -67,15 +67,34 @@ class SteamApiClientTest {
     }
 
     @Test
-    void steamErrorsNeverExposeTheApiKey() {
+    void steamErrorsIncludeSteamsReasonWithoutTheApiKey() {
+        // Same format as Steam's real answer to an invalid SteamID.
         steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/")))
-                .andRespond(withStatus(HttpStatus.FORBIDDEN));
+                .andRespond(withStatus(HttpStatus.BAD_REQUEST).contentType(MediaType.TEXT_HTML).body("""
+                        <html><head><title>Bad Request</title></head><body><h1>Bad Request</h1>
+                        Missing required routing parameter &amp; <pre>key=secret-key</pre></body></html>
+                        """));
         assertThatThrownBy(client::getOwnedGames)
-                .hasMessageContaining("HTTP 403")
+                .hasMessage("Steam returned HTTP 400 when reading the library: "
+                        + "Bad Request Missing required routing parameter & key=***")
                 .hasMessageNotContaining(KEY)
                 .hasNoCause();
 
         steam.reset();
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/")))
+                .andRespond(withStatus(HttpStatus.FORBIDDEN));
+        assertThatThrownBy(client::getOwnedGames)
+                .hasMessage("Steam returned HTTP 403 when reading the library. Check STEAM_API_KEY and STEAM_ID");
+
+        steam.reset();
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/")))
+                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).body("x".repeat(500)));
+        assertThatThrownBy(client::getOwnedGames)
+                .hasMessageEndingWith(": " + "x".repeat(200));
+    }
+
+    @Test
+    void connectionErrorsNeverExposeTheApiKey() {
         steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://steam.test/")))
                 .andRespond(withException(new IOException("connection refused")));
         assertThatThrownBy(client::getOwnedGames)
