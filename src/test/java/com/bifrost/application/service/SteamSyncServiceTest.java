@@ -75,15 +75,21 @@ class SteamSyncServiceTest {
     }
 
     @Test
-    void unknownHoursBecomeTheSteamValueAndRepeatedAppIdsAreCreatedOnce() {
-        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "Game", 59), new OwnedGame(10, "Game", 59)));
-        when(repository.findSteamGames()).thenReturn(List.of());
+    void hoursAreRoundedDownAndUnknownHoursGetTheSteamValue() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 59), new OwnedGame(20, "Old", 179)));
+        when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, null)));
+        Videogame stored = steamGame(2, 20, null);
+        when(repository.update(eq(2), any())).thenAnswer(invocation -> {
+            UnaryOperator<Videogame> patch = invocation.getArgument(1);
+            return Optional.of(patch.apply(stored));
+        });
 
-        assertThat(service.sync(false)).isEqualTo(new Result(1, 0, 1, false));
+        assertThat(service.sync(false)).isEqualTo(new Result(1, 1, 0, false));
 
         ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
         verify(repository).save(created.capture());
         assertThat(created.getValue().getHoursPlayed()).isZero();
+        assertThat(stored.getHoursPlayed()).isEqualTo(2);
     }
 
     @Test

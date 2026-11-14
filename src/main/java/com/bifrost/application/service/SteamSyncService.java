@@ -41,48 +41,48 @@ public class SteamSyncService implements SteamSyncUseCase {
     @Override
     @Transactional
     public Result sync(boolean dryRun) {
-        List<OwnedGame> ownedGames = steamLibrary.getOwnedGames();
+        List<OwnedGame> steamGames = steamLibrary.getOwnedGames();
         Map<Integer, Videogame> collection = videogameRepository.findSteamGames().stream()
                 .collect(Collectors.toMap(Videogame::getSteamAppId, Function.identity()));
 
-        // The map is also updated during the loop, so an app ID repeated by Steam is not created twice.
-        int created = 0;
-        int updated = 0;
-        int unchanged = 0;
-        for (OwnedGame game : ownedGames) {
-            int hours = game.minutesPlayed() / 60;
-            Videogame current = collection.get(game.appId());
-            if (current == null) {
-                Videogame newGame = newSteamGame(game, hours);
-                if (!dryRun) {
-                    videogameRepository.save(newGame);
-                }
-                collection.put(game.appId(), newGame);
-                created++;
-            } else if (Objects.equals(current.getHoursPlayed(), hours)) {
-                unchanged++;
-            } else {
-                if (!dryRun) {
-                    videogameRepository.update(current.getId(), videogame -> {
-                        videogame.setHoursPlayed(hours);
-                        return videogame;
-                    });
-                }
-                current.setHoursPlayed(hours);
-                updated++;
-            }
+        // 1. Decide what changes.
+        List<OwnedGame> newGames = steamGames.stream()
+                .filter(game -> !collection.containsKey(game.appId()))
+                .toList();
+        List<OwnedGame> gamesWithNewHours = steamGames.stream()
+                .filter(game -> collection.containsKey(game.appId()))
+                .filter(game -> !Objects.equals(collection.get(game.appId()).getHoursPlayed(), hoursPlayed(game)))
+                .toList();
+        int unchanged = steamGames.size() - newGames.size() - gamesWithNewHours.size();
+
+        // 2. Apply the changes, unless it is only a preview.
+        if (!dryRun) {
+            newGames.forEach(game -> videogameRepository.save(newVideogame(game)));
+            gamesWithNewHours.forEach(game -> updateHours(collection.get(game.appId()).getId(), hoursPlayed(game)));
         }
-        return new Result(created, updated, unchanged, dryRun);
+        return new Result(newGames.size(), gamesWithNewHours.size(), unchanged, dryRun);
     }
 
-    private Videogame newSteamGame(OwnedGame game, int hours) {
+    /** Steam reports minutes; partial hours are rounded down. */
+    private static int hoursPlayed(OwnedGame game) {
+        return game.minutesPlayed() / 60;
+    }
+
+    private Videogame newVideogame(OwnedGame game) {
         Videogame videogame = new Videogame();
         videogame.setName(game.name());
         videogame.setPlatform(new Platform(platformId, null, null, null));
         videogame.setDigitalPlatform(new DigitalPlatform(digitalPlatformId, null, null));
         videogame.setDigital(1);
-        videogame.setHoursPlayed(hours);
+        videogame.setHoursPlayed(hoursPlayed(game));
         videogame.setSteamAppId(game.appId());
         return videogame;
+    }
+
+    private void updateHours(Integer videogameId, int hours) {
+        videogameRepository.update(videogameId, videogame -> {
+            videogame.setHoursPlayed(hours);
+            return videogame;
+        });
     }
 }
