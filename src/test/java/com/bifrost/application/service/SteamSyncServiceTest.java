@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,12 +34,6 @@ class SteamSyncServiceTest {
                 new OwnedGame(20, "Played more", 600),
                 new OwnedGame(30, "Same hours", 61)));
         when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, 5), steamGame(3, 30, 1)));
-        Videogame stored = steamGame(2, 20, 5);
-        stored.setCompleted(1);
-        when(repository.update(eq(2), any())).thenAnswer(invocation -> {
-            UnaryOperator<Videogame> patch = invocation.getArgument(1);
-            return Optional.of(patch.apply(stored));
-        });
 
         Result result = service.sync(false);
 
@@ -58,10 +50,10 @@ class SteamSyncServiceTest {
         assertThat(game.getDigital()).isEqualTo(1);
         assertThat(game.getCompleted()).isZero();
         assertThat(game.getPlatinum()).isZero();
-        // Only the hours change; data entered manually is kept.
-        assertThat(stored.getHoursPlayed()).isEqualTo(10);
-        assertThat(stored.getCompleted()).isEqualTo(1);
-        verify(repository, never()).update(eq(3), any());
+        // Existing games only get their hours written; the full game is never saved or patched.
+        verify(repository).updateHoursPlayed(2, 10);
+        verify(repository, never()).updateHoursPlayed(eq(3), anyInt());
+        verify(repository, never()).update(anyInt(), any());
     }
 
     @Test
@@ -72,25 +64,20 @@ class SteamSyncServiceTest {
         assertThat(service.sync(true)).isEqualTo(new Result(1, 1, 0, 0, true));
 
         verify(repository, never()).save(any());
-        verify(repository, never()).update(anyInt(), any());
+        verify(repository, never()).updateHoursPlayed(anyInt(), anyInt());
     }
 
     @Test
     void hoursAreRoundedDownAndUnknownHoursGetTheSteamValue() {
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 59), new OwnedGame(20, "Old", 179)));
         when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, null)));
-        Videogame stored = steamGame(2, 20, null);
-        when(repository.update(eq(2), any())).thenAnswer(invocation -> {
-            UnaryOperator<Videogame> patch = invocation.getArgument(1);
-            return Optional.of(patch.apply(stored));
-        });
 
         assertThat(service.sync(false)).isEqualTo(new Result(1, 1, 0, 0, false));
 
         ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
         verify(repository).save(created.capture());
         assertThat(created.getValue().getHoursPlayed()).isZero();
-        assertThat(stored.getHoursPlayed()).isEqualTo(2);
+        verify(repository).updateHoursPlayed(2, 2);
     }
 
     @Test

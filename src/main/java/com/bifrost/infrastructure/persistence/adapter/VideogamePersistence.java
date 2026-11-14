@@ -68,6 +68,11 @@ public class VideogamePersistence implements VideogameRepositoryPort {
     }
 
     @Override
+    public boolean updateHoursPlayed(Integer id, int hoursPlayed) {
+        return videogamesRepository.updateHoursPlayed(id, hoursPlayed) == 1;
+    }
+
+    @Override
     public boolean delete(Integer id) {
         return videogamesRepository.findById(id).map(entity -> {
             videogamesRepository.delete(entity);

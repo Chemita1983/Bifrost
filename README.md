@@ -186,8 +186,9 @@ cannot be deleted and returns 409; existing games are preserved.
   example games no longer sold, are imported. Only new apps are checked, through
   `IStoreBrowseService/GetItems`, which works in Steam's public Web API but is
   not part of its official documentation.
-- Games already imported only get their `hoursPlayed` updated. Completion,
-  platinum, type, year, company and every other field entered manually are kept.
+- Games already imported only get their `hoursPlayed` updated: the sync writes
+  only that column. Name, completion, platinum, type, year, company, platforms
+  and every other field entered manually are never changed.
 - Nothing is ever deleted, even if a game is no longer in the Steam library.
 - Games are matched by their Steam application ID, returned as `steamAppId`.
   It is set when the game is imported and cannot be changed with PATCH.

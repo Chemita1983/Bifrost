@@ -2,6 +2,7 @@ package com.bifrost.infrastructure.persistence.repository;
 
 import com.bifrost.infrastructure.persistence.entity.VideogameEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +25,9 @@ public interface VideogamesJpa extends JpaRepository<VideogameEntity, Integer> {
     List<VideogameEntity> findByVideogameNameContaining(String name);
 
     List<VideogameEntity> findBySteamAppIdNotNull();
+
+    /** Changes only the hours column, so no other data of the game can be overwritten. */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update VideogameEntity v set v.hoursPlayed = :hoursPlayed where v.id = :id")
+    int updateHoursPlayed(@Param("id") Integer id, @Param("hoursPlayed") Integer hoursPlayed);
 }

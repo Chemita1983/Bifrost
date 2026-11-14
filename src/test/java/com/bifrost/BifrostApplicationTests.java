@@ -229,10 +229,19 @@ class BifrostApplicationTests {
                         .andReturn().getResponse().getContentAsString())
                 .get(0).get("id").asInt();
 
-        // Data entered manually; the Steam app ID cannot be changed.
+        // Data entered manually, including a renamed title and another platform; the Steam app ID cannot be changed.
+        jdbc.update("INSERT INTO platform (id, platform_name) VALUES (9002, 'Other PC')");
         mvc.perform(patch("/videogame/{id}", portal2).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"isCompleted\":1,\"videogameType\":\"Puzzle\"}"))
+                        .content("""
+                                {"videogameName":"Portal 2 (mine)", "isCompleted":1, "isPlatinum":1,
+                                 "videogameType":"Puzzle", "videogameYear":"2011", "companyName":"Valve",
+                                 "multiplayer":true, "platformId":9002}
+                                """))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.steamAppId").value(620));
+        String manualRow = "SELECT videogame_name, company_name, is_completed, is_digital, is_platinum, "
+                + "videogame_type, videogame_year, digital_platform_id, platform_id, multiplayer, steam_app_id "
+                + "FROM videogames WHERE id = ?";
+        java.util.Map<String, Object> manualData = jdbc.queryForMap(manualRow, portal2);
         mvc.perform(patch("/videogame/{id}", portal2).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"steamAppId\":1}"))
                 .andExpect(status().isBadRequest());
@@ -243,10 +252,16 @@ class BifrostApplicationTests {
         mvc.perform(post("/steam/sync"))
                 .andExpect(content().json("{\"created\":0,\"updated\":1,\"unchanged\":1,\"skipped\":1,\"dryRun\":false}", true));
         org.assertj.core.api.Assertions.assertThat(games.count()).isEqualTo(2);
-        mvc.perform(get("/videogame").param("name", "Portal 2"))
+        mvc.perform(get("/videogame").param("name", "Portal 2 (mine)"))
                 .andExpect(jsonPath("$[0].hoursPlayed").value(15))
                 .andExpect(jsonPath("$[0].isCompleted").value(true))
+                .andExpect(jsonPath("$[0].isPlatinum").value(true))
                 .andExpect(jsonPath("$[0].videogameType").value("Puzzle"))
+                .andExpect(jsonPath("$[0].videogameYear").value("2011"))
+                .andExpect(jsonPath("$[0].companyName").value("Valve"))
+                .andExpect(jsonPath("$[0].platform.id").value(9002))
                 .andExpect(jsonPath("$[0].steamAppId").value(620));
+        // Every column except the hours is exactly as it was before the sync.
+        org.assertj.core.api.Assertions.assertThat(jdbc.queryForMap(manualRow, portal2)).isEqualTo(manualData);
     }
 }

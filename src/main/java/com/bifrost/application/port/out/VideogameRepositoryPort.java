@@ -21,5 +21,8 @@ public interface VideogameRepositoryPort {
 
     Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
 
+    /** Updates only the hours played; every other field is left untouched. Returns whether the game exists. */
+    boolean updateHoursPlayed(Integer id, int hoursPlayed);
+
     boolean delete(Integer id);
 }
