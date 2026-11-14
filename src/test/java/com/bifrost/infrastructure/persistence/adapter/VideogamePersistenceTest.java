@@ -191,6 +191,18 @@ class VideogamePersistenceTest {
         assertThat(entity.getSteamAppId()).isEqualTo(620);
     }
 
+    @Test
+    void updateHoursPlayedOnlyRunsTheHoursQueryAndReportsMissingGames() {
+        when(videogamesRepository.updateHoursPlayed(1, 12)).thenReturn(1);
+        when(videogamesRepository.updateHoursPlayed(2, 12)).thenReturn(0);
+
+        assertThat(adapter.updateHoursPlayed(1, 12)).isTrue();
+        assertThat(adapter.updateHoursPlayed(2, 12)).isFalse();
+        // No entity is loaded or saved, so no other column can be rewritten.
+        verify(videogamesRepository, never()).findById(any());
+        verify(videogamesRepository, never()).save(any(VideogameEntity.class));
+    }
+
     private void assertBadRequest(Runnable action, String message) {
         assertThatThrownBy(action::run).isInstanceOfSatisfying(ResponseStatusException.class, ex -> {
             assertThat(ex.getStatusCode().value()).isEqualTo(400);

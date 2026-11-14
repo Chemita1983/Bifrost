@@ -66,7 +66,9 @@ public class SteamSyncService implements SteamSyncUseCase {
         // 2. Apply the changes, unless it is only a preview.
         if (!dryRun) {
             newGames.forEach(game -> videogameRepository.save(newVideogame(game)));
-            gamesWithNewHours.forEach(game -> updateHours(collection.get(game.appId()).getId(), hoursPlayed(game)));
+            // Only the hours column is written: name, year, company and other manual data are never touched.
+            gamesWithNewHours.forEach(game ->
+                    videogameRepository.updateHoursPlayed(collection.get(game.appId()).getId(), hoursPlayed(game)));
         }
         return new Result(newGames.size(), gamesWithNewHours.size(), unchanged, skipped, dryRun);
     }
@@ -85,12 +87,5 @@ public class SteamSyncService implements SteamSyncUseCase {
         videogame.setHoursPlayed(hoursPlayed(game));
         videogame.setSteamAppId(game.appId());
         return videogame;
-    }
-
-    private void updateHours(Integer videogameId, int hours) {
-        videogameRepository.update(videogameId, videogame -> {
-            videogame.setHoursPlayed(hours);
-            return videogame;
-        });
     }
 }
