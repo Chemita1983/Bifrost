@@ -18,5 +18,23 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build: .
+    container_name: bifrost-app
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-bifrost}
+      DB_USER: ${DB_USER:-bifrost}
+      DB_PASSWORD: ${DB_PASSWORD}
+      STEAM_API_KEY: ${STEAM_API_KEY:-}
+      STEAM_ID: ${STEAM_ID:-}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
 volumes:
   bifrost_videogames_data:
