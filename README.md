@@ -49,8 +49,8 @@ possible to know:
 - Which titles are exclusively multiplayer.
 - Which games are waiting to be started or completed.
 
-The application provides a REST API for managing the collection. Future work
-includes Steam synchronization and MCP integration for compatible AI clients.
+The application provides a REST API for managing the collection and can import
+the Steam library. Future work includes MCP integration for compatible AI clients.
 
 ## Current features
 
@@ -61,6 +61,7 @@ includes Steam synchronization and MCP integration for compatible AI clients.
 - Completion and platinum status tracking.
 - Multiplayer indicator.
 - Physical and digital copy tracking.
+- Steam library import and hours played synchronization.
 - MariaDB persistence.
 - REST API built with Spring Boot.
 
@@ -174,6 +175,41 @@ and `DELETE /digital-platform/{id}`. Successful deletion returns 204 and an
 unknown ID returns 404. A platform or digital store referenced by a video game
 cannot be deleted and returns 409; existing games are preserved.
 
+### Steam synchronization
+
+`POST /steam/sync` imports the Steam library of the configured account:
+
+- Steam games that are not in the collection are created as digital PC games
+  from the Steam store, with their name and hours played.
+- Games already imported only get their `hoursPlayed` updated. Completion,
+  platinum, type, year, company and every other field entered manually are kept.
+- Nothing is ever deleted, even if a game is no longer in the Steam library.
+- Games are matched by their Steam application ID, returned as `steamAppId`.
+  It is set when the game is imported and cannot be changed with PATCH.
+- Hours are Steam minutes divided by 60, rounded down.
+
+`POST /steam/sync?dryRun=true` returns the same summary without saving anything.
+The response is `{"created": 3, "updated": 1, "unchanged": 40, "dryRun": false}`.
+
+Configure the account with environment variables; never commit their values:
+
+| Variable | Description |
+| --- | --- |
+| `STEAM_API_KEY` | Steam Web API key. |
+| `STEAM_ID` | SteamID64 of the account. |
+| `STEAM_PLATFORM_ID` | Existing platform for imported games (default `6`, PC). |
+| `STEAM_DIGITAL_PLATFORM_ID` | Existing digital store for imported games (default `1`, Steam). |
+
+The game details of the Steam profile must be visible, otherwise Steam does not
+return the library. If the configuration is missing or Steam fails, the endpoint
+returns a generic HTTP 500 and the reason is written to the application log;
+the API key is never included in errors or logs. Steam does not provide type,
+year or company in this call, so those fields stay empty until filled manually.
+
+The first start of this version adds the nullable `steam_app_id` column with a
+unique constraint through `ddl-auto: update`; existing rows are not modified.
+Back up the database before starting it.
+
 ### Testing
 
 The project includes unit tests for application services, controllers, mappers,
@@ -227,9 +263,8 @@ mvn spring-boot:run
 
 ## Project status
 
-The project is currently under active development. The REST API and persistence
-foundation are implemented; future work includes Steam synchronization and MCP
-integration.
+The project is currently under active development. The REST API, persistence
+and Steam synchronization are implemented; future work includes MCP integration.
 
 ## License
 

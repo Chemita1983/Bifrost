@@ -33,7 +33,8 @@ public class PersistenceMapper {
         return new Videogame(entity.getId(), entity.getVideogameName(), entity.getVideogameType(),
                 entity.getVideogameYear(), toDomain(entity.getPlatformEntity()),
                 toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(), entity.getIsDigital(),
-                entity.getIsCompleted(), entity.getIsPlatinum(), entity.isMultiplayer(), entity.getHoursPlayed());
+                entity.getIsCompleted(), entity.getIsPlatinum(), entity.isMultiplayer(), entity.getHoursPlayed(),
+                entity.getSteamAppId());
     }
 
     /*

@@ -15,5 +15,6 @@ public record VideogameResponse(
         boolean isCompleted,
         boolean isPlatinum,
         boolean multiplayer,
-        Integer hoursPlayed) {
+        Integer hoursPlayed,
+        Integer steamAppId) {
 }

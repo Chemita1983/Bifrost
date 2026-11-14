@@ -14,6 +14,9 @@ public interface VideogameRepositoryPort {
 
     List<Videogame> findByNameContaining(String name);
 
+    /** Videogames imported from Steam, that is, with a Steam application ID. */
+    List<Videogame> findSteamGames();
+
     Videogame save(Videogame videogame);
 
     Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);

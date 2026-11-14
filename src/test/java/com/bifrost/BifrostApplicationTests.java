@@ -1,5 +1,7 @@
 package com.bifrost;
 
+import com.bifrost.application.port.out.SteamLibraryPort;
+import com.bifrost.application.port.out.SteamLibraryPort.OwnedGame;
 import com.bifrost.infrastructure.persistence.repository.DigitalPlatformJpa;
 import com.bifrost.infrastructure.persistence.repository.PlatformJpa;
 import com.bifrost.infrastructure.persistence.repository.VideogamesJpa;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.annotation.DirtiesContext;
@@ -18,6 +22,9 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -35,8 +42,16 @@ class BifrostApplicationTests {
         properties.add("spring.datasource.username", DATABASE::getUsername);
         properties.add("spring.datasource.password", DATABASE::getPassword);
         properties.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        properties.add("bifrost.steam.platform-id", () -> STEAM_IDS);
+        properties.add("bifrost.steam.digital-platform-id", () -> STEAM_IDS);
     }
 
+    /** Fixed IDs for the PC platform and the Steam store used by the Steam sync test. */
+    private static final int STEAM_IDS = 9001;
+
+    /** Steam is never called: the library is simulated. */
+    @MockitoBean SteamLibraryPort steamLibrary;
+    @Autowired JdbcTemplate jdbc;
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired VideogamesJpa games;
@@ -187,4 +202,46 @@ class BifrostApplicationTests {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.digitalPlatform").doesNotExist());
     }
 
+    @Test
+    void steamSyncAddsNewGamesUpdatesHoursAndKeepsManualData() throws Exception {
+        jdbc.update("INSERT INTO platform (id, platform_name) VALUES (?, 'PC')", STEAM_IDS);
+        jdbc.update("INSERT INTO digital_platform (id, digital_platform_name) VALUES (?, 'Steam')", STEAM_IDS);
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(
+                new OwnedGame(620, "Portal 2", 754), new OwnedGame(400, "Portal", 0)));
+
+        mvc.perform(post("/steam/sync").param("dryRun", "true"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"dryRun\":true}", true));
+        org.assertj.core.api.Assertions.assertThat(games.count()).isZero();
+
+        mvc.perform(post("/steam/sync"))
+                .andExpect(content().json("{\"created\":2,\"updated\":0,\"unchanged\":0,\"dryRun\":false}", true));
+        int portal2 = json.readTree(mvc.perform(get("/videogame").param("name", "Portal 2"))
+                        .andExpect(jsonPath("$[0].steamAppId").value(620))
+                        .andExpect(jsonPath("$[0].hoursPlayed").value(12))
+                        .andExpect(jsonPath("$[0].isDigital").value(true))
+                        .andExpect(jsonPath("$[0].platform.id").value(STEAM_IDS))
+                        .andExpect(jsonPath("$[0].digitalPlatform.id").value(STEAM_IDS))
+                        .andReturn().getResponse().getContentAsString())
+                .get(0).get("id").asInt();
+
+        // Data entered manually; the Steam app ID cannot be changed.
+        mvc.perform(patch("/videogame/{id}", portal2).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isCompleted\":1,\"videogameType\":\"Puzzle\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.steamAppId").value(620));
+        mvc.perform(patch("/videogame/{id}", portal2).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"steamAppId\":1}"))
+                .andExpect(status().isBadRequest());
+
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(
+                new OwnedGame(620, "Portal 2", 900), new OwnedGame(400, "Portal", 0)));
+        mvc.perform(post("/steam/sync"))
+                .andExpect(content().json("{\"created\":0,\"updated\":1,\"unchanged\":1,\"dryRun\":false}", true));
+        org.assertj.core.api.Assertions.assertThat(games.count()).isEqualTo(2);
+        mvc.perform(get("/videogame").param("name", "Portal 2"))
+                .andExpect(jsonPath("$[0].hoursPlayed").value(15))
+                .andExpect(jsonPath("$[0].isCompleted").value(true))
+                .andExpect(jsonPath("$[0].videogameType").value("Puzzle"))
+                .andExpect(jsonPath("$[0].steamAppId").value(620));
+    }
 }

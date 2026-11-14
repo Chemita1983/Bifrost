@@ -22,4 +22,6 @@ public interface VideogamesJpa extends JpaRepository<VideogameEntity, Integer> {
             @Param("multiplayer") Boolean multiplayer, @Param("type") String type);
 
     List<VideogameEntity> findByVideogameNameContaining(String name);
+
+    List<VideogameEntity> findBySteamAppIdNotNull();
 }

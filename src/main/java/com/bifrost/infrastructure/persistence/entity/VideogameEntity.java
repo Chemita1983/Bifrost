@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -44,4 +45,6 @@ public class VideogameEntity extends BifrostEntity {
 
     private Integer hoursPlayed;
 
+    @Column(unique = true)
+    private Integer steamAppId;
 }

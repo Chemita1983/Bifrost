@@ -10,3 +10,13 @@ spring:
     hibernate:
       ddl-auto: update
     open-in-view: false
+
+bifrost:
+  steam:
+    # Never commit these values: provide them as environment variables.
+    api-key: ${STEAM_API_KEY:}
+    steam-id: ${STEAM_ID:}
+    base-url: ${STEAM_API_URL:https://api.steampowered.com}
+    # Existing platform (PC) and digital store (Steam) assigned to imported games.
+    platform-id: ${STEAM_PLATFORM_ID:6}
+    digital-platform-id: ${STEAM_DIGITAL_PLATFORM_ID:1}

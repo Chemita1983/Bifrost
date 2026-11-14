@@ -76,6 +76,18 @@ class PersistenceMapperTest {
     }
 
     @Test
+    void mapsSteamAppIdToDomainButUpdateEntityDoesNotCopyIt() {
+        var entity = new VideogameEntity();
+        entity.setSteamAppId(620);
+        Videogame domain = mapper.toDomain(entity);
+        assertThat(domain.getSteamAppId()).isEqualTo(620);
+
+        domain.setSteamAppId(1);
+        mapper.updateEntity(domain, entity, null, null);
+        assertThat(entity.getSteamAppId()).isEqualTo(620);
+    }
+
+    @Test
     void mapsVideogameHoursInBothDirections() {
         for (Integer hours : new Integer[] {null, 0, 42}) {
             var entity = new VideogameEntity();

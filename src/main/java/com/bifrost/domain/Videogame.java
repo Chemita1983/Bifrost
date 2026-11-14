@@ -24,4 +24,6 @@ public class Videogame {
     private boolean multiplayer;
     /** {@code null} means unknown. */
     private Integer hoursPlayed;
+    /** Steam application ID; only set for games imported from Steam and never changed afterwards. */
+    private Integer steamAppId;
 }
