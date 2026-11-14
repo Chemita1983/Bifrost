@@ -122,9 +122,10 @@ without coupling them directly to the business domain.
 
 ### Persistence
 
-MariaDB runs through Docker Compose. Spring Data JPA repositories are kept in
-the infrastructure layer, while application services depend on output ports
-instead of depending directly on JPA repositories.
+MariaDB runs through Docker Compose, and the application itself can run in
+Docker too (see [Run with Docker](#run-with-docker)). Spring Data JPA
+repositories are kept in the infrastructure layer, while application services
+depend on output ports instead of depending directly on JPA repositories.
 
 ### API
 
@@ -197,7 +198,9 @@ cannot be deleted and returns 409; existing games are preserved.
 `POST /steam/sync?dryRun=true` returns the same summary without saving anything.
 The response is `{"created": 3, "updated": 1, "unchanged": 40, "skipped": 2, "dryRun": false}`.
 
-Configure the account with environment variables; never commit their values:
+Configure the account with environment variables; never commit their values.
+When running with Docker, put them in `bifrost.env` (see
+[Run with Docker](#run-with-docker)):
 
 | Variable | Description |
 | --- | --- |
@@ -231,10 +234,58 @@ JPA. Integration tests use MockMvc, Spring Data JPA and a disposable MariaDB
 - Maven.
 - Docker and Docker Compose.
 
-### Start MariaDB
+### Run with Docker
+
+Docker Compose starts MariaDB and the Bifröst application together. The
+application image is built from the `Dockerfile` (Maven build, Java 17 runtime).
+
+1. Create your configuration file from the template. `bifrost.env` and `.env`
+   are ignored by git, so real values are never committed:
+
+   ```bash
+   cp bifrost.env.example bifrost.env
+   ```
+
+2. Edit `bifrost.env`:
+
+   | Variable | Description |
+   | --- | --- |
+   | `DB_NAME`, `DB_USER` | Database name and user (default `bifrost`). |
+   | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | Database passwords. **Required.** |
+   | `DB_PORT` | Host port for MariaDB (default `3306`). |
+   | `APP_PORT` | Host port for the API (default `8080`). |
+   | `STEAM_API_KEY`, `STEAM_ID` | Needed only for `POST /steam/sync`. |
+   | `STEAM_PLATFORM_ID`, `STEAM_DIGITAL_PLATFORM_ID` | Optional, see [Steam synchronization](#steam-synchronization). |
+
+3. Start everything:
+
+   ```bash
+   docker compose --env-file bifrost.env up -d --build
+   ```
+
+   Compose only reads a file named `.env` automatically. If you keep your
+   values in `bifrost.env`, always pass `--env-file bifrost.env`; otherwise
+   `DB_PASSWORD` is blank and the application cannot connect.
+
+The API is then available at `http://localhost:8080`. Useful commands:
 
 ```bash
-docker compose up -d
+docker logs -f bifrost-app                        # application logs
+docker compose --env-file bifrost.env down        # stop (data is kept)
+```
+
+Inside Compose the application reaches the database as `mariadb` through the
+internal network. Data lives in the `bifrost_videogames_data` volume, which
+survives `down` and rebuilds. Do not run the application from your IDE on the
+same port at the same time. Back up the database before the first start, since
+`ddl-auto: update` may change the schema.
+
+### Start only MariaDB
+
+To run the application from Maven or your IDE, start just the database:
+
+```bash
+docker compose --env-file bifrost.env up -d mariadb
 ```
 
 ### Run the tests
@@ -261,7 +312,10 @@ one-time schema migration or require a backup.
 Concurrent updates to the same record can overwrite each other. The current
 implementation is intended for personal use and does not prevent this conflict.
 
-### Run the application
+### Run the application locally
+
+With MariaDB running, export the variables (for example `DB_PASSWORD` and,
+for Steam, `STEAM_API_KEY` and `STEAM_ID`) and start the application:
 
 ```bash
 mvn spring-boot:run

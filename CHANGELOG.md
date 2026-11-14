@@ -16,6 +16,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- Docker support: multi-stage `Dockerfile`, an `app` service in `docker-compose.yml` that waits for a healthy
+  MariaDB, `.dockerignore` and a `bifrost.env.example` template. `.env` and `bifrost.env` are git-ignored.
 - `POST /steam/sync` imports the Steam library: new games are created as digital PC games from Steam and
   existing ones only get their hours updated, writing only the `hours_played` column so manual data
   is never overwritten; nothing is deleted. `dryRun=true` previews the changes.
