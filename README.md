@@ -164,12 +164,10 @@ response fields. Other PATCH fields reject null. Text values must be strings,
 status fields must be integers 0 or 1, and `multiplayer` must be a boolean.
 Unknown fields and invalid types are rejected with 400 before modifying data.
 
-For an existing schema with the legacy `players` column, review the one-time
-script at `database/migrations/20261031_hours_and_sequences.sql`. It removes
-`players`, adds `hours_played`, and adjusts identifier sequences. Back up the
-database and stop writers before running it; it is not applied automatically.
-Existing rows retain unknown hours rather than being assigned zero. The current
-`ddl-auto: update` setting may also change the schema at application startup.
+The schema is managed by Hibernate: the current `ddl-auto: update` setting
+creates and updates tables and columns at application startup, so back up the
+database before starting a new version. Existing rows without playtime keep
+unknown hours rather than being assigned zero.
 
 Records can be deleted using `DELETE /videogame/{id}`, `DELETE /platform/{id}`,
 and `DELETE /digital-platform/{id}`. Successful deletion returns 204 and an
@@ -306,8 +304,8 @@ isolated unit and web tests without Docker:
 mvn -Dtest='*Test,!BifrostApplicationTests' test
 ```
 
-The integration tests create their own small fixtures; they do not exercise the
-one-time schema migration or require a backup.
+The integration tests create their own small fixtures and do not require a
+backup.
 
 Concurrent updates to the same record can overwrite each other. The current
 implementation is intended for personal use and does not prevent this conflict.
