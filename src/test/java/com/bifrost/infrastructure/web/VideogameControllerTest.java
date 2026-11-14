@@ -87,7 +87,7 @@ class VideogameControllerTest {
 
     @Test
     void shouldUpdateVideogame() {
-        Videogame current = new Videogame(1, "Mario", "Platform", "2020", null, null, "Nintendo", 0, 0, 0, false, null);
+        Videogame current = new Videogame(1, "Mario", "Platform", "2020", null, null, "Nintendo", 0, 0, 0, false, null, null);
         when(videogameUseCase.update(eq(1), any())).thenAnswer(invocation -> {
             UnaryOperator<Videogame> update = invocation.getArgument(1);
             return Optional.of(update.apply(current));

@@ -1,5 +1,6 @@
 package com.bifrost.infrastructure.mapper;
 
+import com.bifrost.domain.Videogame;
 import com.bifrost.infrastructure.web.dto.VideogameRequest;
 import org.junit.jupiter.api.Test;
 
@@ -17,5 +18,15 @@ class WebMapperTest {
             assertThat(mapper.toRequest(domain).hoursPlayed()).isEqualTo(hours);
             assertThat(mapper.toResponse(domain).hoursPlayed()).isEqualTo(hours);
         }
+    }
+
+    @Test
+    void steamAppIdIsReturnedButCannotComeFromARequest() {
+        var request = new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, null);
+        assertThat(mapper.toDomain(request).getSteamAppId()).isNull();
+
+        Videogame steamGame = new Videogame();
+        steamGame.setSteamAppId(620);
+        assertThat(mapper.toResponse(steamGame).steamAppId()).isEqualTo(620);
     }
 }

@@ -46,9 +46,16 @@ public class VideogamePersistence implements VideogameRepositoryPort {
     }
 
     @Override
+    public List<Videogame> findSteamGames() {
+        return videogamesRepository.findBySteamAppIdNotNull().stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public Videogame save(Videogame videogame) {
         VideogameEntity entity = new VideogameEntity();
         copyWithRelations(videogame, entity);
+        // Only set when the game is created; updates never change it.
+        entity.setSteamAppId(videogame.getSteamAppId());
         return mapper.toDomain(videogamesRepository.save(entity));
     }
 

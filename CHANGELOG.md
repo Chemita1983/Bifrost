@@ -16,6 +16,10 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- `POST /steam/sync` imports the Steam library: new games are created as digital PC games from Steam and
+  existing ones only get their hours updated; nothing is deleted. `dryRun=true` previews the changes.
+  Apps that the Steam store identifies as software are skipped; games and DLC are imported.
+- Read-only `steamAppId` for imported video games, stored in a new nullable unique `steam_app_id` column.
 - MariaDB 11.4 Testcontainers integration tests covering API operations, filters,
   hours played and foreign-key constraints using disposable data.
 - Optional nullable `hoursPlayed` for video games, validated as a non-negative integer and preserved when omitted from PATCH.

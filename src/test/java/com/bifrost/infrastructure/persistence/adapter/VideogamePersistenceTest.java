@@ -156,6 +156,41 @@ class VideogamePersistenceTest {
         assertThat(entity.getPlatformEntity()).isSameAs(platform);
     }
 
+    @Test
+    void findSteamGamesMapsOnlyGamesWithSteamAppId() {
+        VideogameEntity entity = new VideogameEntity();
+        entity.setSteamAppId(620);
+        when(videogamesRepository.findBySteamAppIdNotNull()).thenReturn(List.of(entity));
+
+        assertThat(adapter.findSteamGames()).singleElement()
+                .satisfies(game -> assertThat(game.getSteamAppId()).isEqualTo(620));
+    }
+
+    @Test
+    void saveStoresSteamAppIdButUpdateNeverChangesIt() {
+        PlatformEntity platform = new PlatformEntity();
+        platform.setId(7);
+        when(platformRepository.findById(7)).thenReturn(Optional.of(platform));
+        when(videogamesRepository.save(any(VideogameEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Videogame steamGame = new Videogame();
+        steamGame.setName("Portal 2");
+        steamGame.setPlatform(new Platform(7, null, null, null));
+        steamGame.setSteamAppId(620);
+
+        assertThat(adapter.save(steamGame).getSteamAppId()).isEqualTo(620);
+
+        VideogameEntity entity = new VideogameEntity();
+        entity.setPlatformEntity(platform);
+        entity.setSteamAppId(620);
+        when(videogamesRepository.findById(1)).thenReturn(Optional.of(entity));
+        // A PATCH builds the game from the request, which has no steamAppId.
+        adapter.update(1, game -> {
+            game.setSteamAppId(null);
+            return game;
+        });
+        assertThat(entity.getSteamAppId()).isEqualTo(620);
+    }
+
     private void assertBadRequest(Runnable action, String message) {
         assertThatThrownBy(action::run).isInstanceOfSatisfying(ResponseStatusException.class, ex -> {
             assertThat(ex.getStatusCode().value()).isEqualTo(400);

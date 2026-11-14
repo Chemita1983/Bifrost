@@ -29,7 +29,7 @@ public class WebMapper {
                 : new DigitalPlatform(request.digitalPlatformId(), null, null);
         return new Videogame(null, request.videogameName(), request.videogameType(), request.videogameYear(),
                 platform, digitalPlatform, request.companyName(), request.isDigital(), request.isCompleted(),
-                request.isPlatinum(), request.multiplayer(), request.hoursPlayed());
+                request.isPlatinum(), request.multiplayer(), request.hoursPlayed(), null);
     }
 
     /** Used by PATCH to merge the received fields into the current values. */
@@ -62,6 +62,6 @@ public class WebMapper {
                 game.getPlatform() == null ? null : toResponse(game.getPlatform()),
                 game.getDigitalPlatform() == null ? null : toResponse(game.getDigitalPlatform()),
                 game.getCompanyName(), game.getDigital() == 1, game.getCompleted() == 1,
-                game.getPlatinum() == 1, game.isMultiplayer(), game.getHoursPlayed());
+                game.getPlatinum() == 1, game.isMultiplayer(), game.getHoursPlayed(), game.getSteamAppId());
     }
 }
