@@ -8,13 +8,15 @@ import java.util.function.UnaryOperator;
 
 public interface VideogameUseCase {
 
-    List<Videogame> getAll();
-
-    List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type);
+    /** Null filters are ignored, so passing only nulls returns every videogame. */
+    List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer,
+                                String type);
 
     List<Videogame> getByName(String name);
 
     Videogame create(Videogame videogame);
+
     Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch);
+
     boolean delete(Integer id);
 }

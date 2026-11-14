@@ -36,11 +36,13 @@ public class PlatformApplicationService implements PlatformUseCase {
     public Platform create(Platform platform) {
         return platformRepository.save(platform);
     }
+
     @Override
     @Transactional
     public Optional<Platform> update(Integer id, UnaryOperator<Platform> patch) {
         return platformRepository.update(id, patch);
     }
+
     @Override
     @Transactional
     public boolean delete(Integer id) {

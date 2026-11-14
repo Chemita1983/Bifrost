@@ -13,31 +13,33 @@ import java.util.function.UnaryOperator;
 @Service
 public class DigitalPlatformApplicationService implements DigitalPlatformUseCase {
 
-    private final DigitalPlatformRepositoryPort digitalPlatformJpa;
+    private final DigitalPlatformRepositoryPort digitalPlatformRepository;
 
-    public DigitalPlatformApplicationService(DigitalPlatformRepositoryPort digitalPlatformJpa) {
-        this.digitalPlatformJpa = digitalPlatformJpa;
+    public DigitalPlatformApplicationService(DigitalPlatformRepositoryPort digitalPlatformRepository) {
+        this.digitalPlatformRepository = digitalPlatformRepository;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<DigitalPlatform> getAll() {
-        return digitalPlatformJpa.findAll();
+        return digitalPlatformRepository.findAll();
     }
 
     @Override
     @Transactional
     public DigitalPlatform create(DigitalPlatform digitalPlatform) {
-        return digitalPlatformJpa.save(digitalPlatform);
+        return digitalPlatformRepository.save(digitalPlatform);
     }
+
     @Override
     @Transactional
     public Optional<DigitalPlatform> update(Integer id, UnaryOperator<DigitalPlatform> patch) {
-        return digitalPlatformJpa.update(id, patch);
+        return digitalPlatformRepository.update(id, patch);
     }
+
     @Override
     @Transactional
     public boolean delete(Integer id) {
-        return digitalPlatformJpa.delete(id);
+        return digitalPlatformRepository.delete(id);
     }
 }

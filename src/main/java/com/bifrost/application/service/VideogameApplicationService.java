@@ -21,13 +21,8 @@ public class VideogameApplicationService implements VideogameUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Videogame> getAll() {
-        return videogameRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted, Boolean multiplayer, String type) {
+    public List<Videogame> getFiltered(Integer platformId, Boolean isDigital, Boolean isCompleted,
+                                       Boolean multiplayer, String type) {
         return videogameRepository.findFiltered(platformId, isDigital, isCompleted, multiplayer, type);
     }
 
@@ -42,11 +37,13 @@ public class VideogameApplicationService implements VideogameUseCase {
     public Videogame create(Videogame videogame) {
         return videogameRepository.save(videogame);
     }
+
     @Override
     @Transactional
     public Optional<Videogame> update(Integer id, UnaryOperator<Videogame> patch) {
         return videogameRepository.update(id, patch);
     }
+
     @Override
     @Transactional
     public boolean delete(Integer id) {

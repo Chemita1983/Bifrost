@@ -29,17 +29,6 @@ class VideogameApplicationServiceTest {
     }
 
     @Test
-    void shouldGetAllVideogames() {
-        List<Videogame> videogames = List.of(new Videogame());
-        when(videogameRepository.findAll()).thenReturn(videogames);
-
-        List<Videogame> result = service.getAll();
-
-        assertThat(result).isSameAs(videogames);
-        verify(videogameRepository).findAll();
-    }
-
-    @Test
     void filteredSearchDelegatesAllValuesIncludingFalse() {
         List<Videogame> games = List.of(new Videogame());
         when(videogameRepository.findFiltered(4, false, false, true, "rPg")).thenReturn(games);

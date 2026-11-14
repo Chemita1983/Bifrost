@@ -91,7 +91,7 @@ class PlatformControllerTest {
 
     @Test
     void shouldSerializePlatformResponseWithIdAndExistingFields() throws Exception {
-        PlatformResponse response = PlatformResponse.from(new Platform(7, "Switch", "Nintendo", "2017"));
+        PlatformResponse response = new WebMapper().toResponse(new Platform(7, "Switch", "Nintendo", "2017"));
         ObjectMapper mapper = new ObjectMapper();
 
         assertThat(response.id()).isEqualTo(7);
@@ -118,12 +118,5 @@ class PlatformControllerTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deletePlatform(1))
                 .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
                         ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND));
-    }
-    @Test
-    void deleteTranslatesIntegrityConflict() {
-        when(platformUseCase.delete(1)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("constraint"));
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deletePlatform(1))
-                .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
-                        ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.CONFLICT));
     }
 }

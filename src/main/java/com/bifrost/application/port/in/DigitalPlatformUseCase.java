@@ -11,6 +11,8 @@ public interface DigitalPlatformUseCase {
     List<DigitalPlatform> getAll();
 
     DigitalPlatform create(DigitalPlatform digitalPlatform);
+
     Optional<DigitalPlatform> update(Integer id, UnaryOperator<DigitalPlatform> patch);
+
     boolean delete(Integer id);
 }

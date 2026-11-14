@@ -48,7 +48,7 @@ class UpdateEndpointsTest {
         VideogameEntity game = new VideogameEntity();
         game.setId(3); game.setVideogameName("Game"); game.setHoursPlayed(42); game.setPlatformEntity(platform);
         when(games.findById(3)).thenReturn(Optional.of(game));
-        when(games.findAll()).thenReturn(List.of(game));
+        when(games.findFiltered(null, null, null, null, null)).thenReturn(List.of(game));
         mvc.perform(get("/videogames")).andExpect(status().isOk()).andExpect(jsonPath("$[0].hoursPlayed").value(42));
         mvc.perform(patch("/videogame/3").contentType(MediaType.APPLICATION_JSON).content("{\"videogameName\":\"New\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.hoursPlayed").value(42));
@@ -87,7 +87,7 @@ class UpdateEndpointsTest {
                 .andExpect(status().isOk()).andExpect(content().json("[]"));
         verify(games).findFiltered(null, null, null, null, "Shooter");
         mvc.perform(get("/videogames")).andExpect(status().isOk()).andExpect(content().json("[]"));
-        verify(games).findAll();
+        verify(games).findFiltered(null, null, null, null, null);
     }
 
     @Test
@@ -264,7 +264,7 @@ class UpdateEndpointsTest {
                 .andExpect(jsonPath("$.message").value("Resource is in use"))
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("secret"))));
         mvc.perform(patch("/platform/99").contentType(MediaType.APPLICATION_JSON).content("{}"))
-                .andExpect(status().isNotFound()).andExpect(jsonPath("$.message").value("Not Found"));
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.message").value("Platform not found"));
         mvc.perform(post("/platform").contentType(MediaType.APPLICATION_JSON).content("{"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Invalid request body"));
     }

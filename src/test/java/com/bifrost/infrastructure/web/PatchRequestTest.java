@@ -67,7 +67,7 @@ class PatchRequestTest {
         body.put("platformId", null);
         body.put("isDigital", 0);
         PatchRequest.validateVideogame(body, validator);
-        VideogameRequest current = new VideogameRequest("Game", null, null, 2, null, null, 1, 0, 0, false);
+        VideogameRequest current = new VideogameRequest("Game", null, null, 2, null, null, 1, 0, 0, false, null);
         VideogameRequest merged = PatchRequest.merge(body, current);
         assertThat(merged.videogameName()).isEqualTo("Game");
         assertThat(merged.platformId()).isNull();
@@ -123,8 +123,8 @@ class PatchRequestTest {
     void requestDtosValidateNamesAndVideogameBoundaries() {
         assertThat(validator.validate(new PlatformRequest(" ", null, null))).isNotEmpty();
         assertThat(validator.validate(new DigitalPlatformRequest(null, null))).isNotEmpty();
-        assertThat(validator.validate(new VideogameRequest("Game", null, null, 1, 1, null, 0, 1, 0, false))).isEmpty();
-        var violations = validator.validate(new VideogameRequest(" ", null, null, 0, -1, null, -1, 2, 2, false));
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, 1, 1, null, 0, 1, 0, false, null))).isEmpty();
+        var violations = validator.validate(new VideogameRequest(" ", null, null, 0, -1, null, -1, 2, 2, false, null));
         assertThat(violations).extracting(v -> v.getPropertyPath().toString())
                 .containsExactlyInAnyOrder("videogameName", "platformId", "digitalPlatformId", "isDigital", "isCompleted", "isPlatinum");
     }

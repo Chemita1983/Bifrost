@@ -13,6 +13,8 @@ public interface PlatformUseCase {
     List<Platform> getByName(String name);
 
     Platform create(Platform platform);
+
     Optional<Platform> update(Integer id, UnaryOperator<Platform> patch);
+
     boolean delete(Integer id);
 }

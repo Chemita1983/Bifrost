@@ -82,7 +82,7 @@ class DigitalPlatformControllerTest {
 
     @Test
     void shouldSerializeDigitalPlatformResponseWithIdAndExistingFields() throws Exception {
-        DigitalPlatformResponse response = DigitalPlatformResponse.from(new DigitalPlatform(8, "Steam", "Valve"));
+        DigitalPlatformResponse response = new WebMapper().toResponse(new DigitalPlatform(8, "Steam", "Valve"));
         ObjectMapper mapper = new ObjectMapper();
 
         assertThat(response.id()).isEqualTo(8);
@@ -109,12 +109,5 @@ class DigitalPlatformControllerTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deleteDigitalPlatform(1))
                 .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
                         ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.NOT_FOUND));
-    }
-    @Test
-    void deleteTranslatesIntegrityConflict() {
-        when(digitalPlatformUseCase.delete(1)).thenThrow(new org.springframework.dao.DataIntegrityViolationException("constraint"));
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.deleteDigitalPlatform(1))
-                .isInstanceOfSatisfying(org.springframework.web.server.ResponseStatusException.class,
-                        ex -> assertThat(ex.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.CONFLICT));
     }
 }
