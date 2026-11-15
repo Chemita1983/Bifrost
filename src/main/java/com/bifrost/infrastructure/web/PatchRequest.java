@@ -40,6 +40,8 @@ final class PatchRequest {
                         validateField(VideogameRequest.class, name, value, String.class, false, validator);
                 case "platformId", "digitalPlatformId", "hoursPlayed" ->
                         validateField(VideogameRequest.class, name, value, Integer.class, true, validator);
+                case "coverUrl" ->
+                        validateField(VideogameRequest.class, name, value, String.class, true, validator);
                 case "isDigital", "isCompleted", "isPlatinum" ->
                         validateField(VideogameRequest.class, name, value, Integer.class, false, validator);
                 case "multiplayer" ->
@@ -83,7 +85,8 @@ final class PatchRequest {
                 (Integer) body.getOrDefault("isCompleted", current.isCompleted()),
                 (Integer) body.getOrDefault("isPlatinum", current.isPlatinum()),
                 (Boolean) body.getOrDefault("multiplayer", current.multiplayer()),
-                (Integer) body.getOrDefault("hoursPlayed", current.hoursPlayed()));
+                (Integer) body.getOrDefault("hoursPlayed", current.hoursPlayed()),
+                (String) body.getOrDefault("coverUrl", current.coverUrl()));
     }
 
     private static ResponseStatusException invalid(String field) {

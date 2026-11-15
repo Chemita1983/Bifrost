@@ -47,4 +47,7 @@ public class VideogameEntity extends BifrostEntity {
 
     @Column(unique = true)
     private Integer steamAppId;
+
+    @Column(length = 2048)
+    private String coverUrl;
 }

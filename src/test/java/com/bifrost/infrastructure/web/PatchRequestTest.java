@@ -21,7 +21,7 @@ class PatchRequestTest {
 
     @Test
     void hoursCanBePreservedSetToZeroOrClearedAndMustBeNonNegativeIntegers() {
-        var current = new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, 12);
+        var current = new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, 12, null);
         assertThat(PatchRequest.merge(Map.of(), current).hoursPlayed()).isEqualTo(12);
         PatchRequest.validateVideogame(Map.of("hoursPlayed", 0), validator);
         assertThat(PatchRequest.merge(Map.of("hoursPlayed", 0), current).hoursPlayed()).isZero();
@@ -33,8 +33,31 @@ class PatchRequestTest {
             assertThatThrownBy(() -> PatchRequest.validateVideogame(Map.of("hoursPlayed", invalid), validator))
                     .isInstanceOf(ResponseStatusException.class);
         }
-        assertThat(validator.validate(new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, -1)))
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, -1, null)))
                 .extracting(v -> v.getPropertyPath().toString()).contains("hoursPlayed");
+    }
+
+    @Test
+    void coverUrlCanBePreservedChangedOrClearedAndMustBeAnHttpUrl() {
+        var current = new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, null,
+                "https://example.com/a.jpg");
+        assertThat(PatchRequest.merge(Map.of(), current).coverUrl()).isEqualTo("https://example.com/a.jpg");
+        PatchRequest.validateVideogame(Map.of("coverUrl", "http://example.com/b.png"), validator);
+        assertThat(PatchRequest.merge(Map.of("coverUrl", "http://example.com/b.png"), current).coverUrl())
+                .isEqualTo("http://example.com/b.png");
+        Map<String, Object> clear = new HashMap<>();
+        clear.put("coverUrl", null);
+        PatchRequest.validateVideogame(clear, validator);
+        assertThat(PatchRequest.merge(clear, current).coverUrl()).isNull();
+        for (Object invalid : List.of("", " ", "ftp://example.com/a.jpg", "javascript:alert(1)", "example.com/a.jpg",
+                "https://example.com/a b.jpg", "https://example.com/" + "a".repeat(2048), 5)) {
+            assertThatThrownBy(() -> PatchRequest.validateVideogame(Map.of("coverUrl", invalid), validator))
+                    .isInstanceOf(ResponseStatusException.class);
+        }
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, null,
+                "javascript:alert(1)"))).extracting(v -> v.getPropertyPath().toString()).contains("coverUrl");
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, null, null, null, 0, 0, 0, false, null,
+                null))).isEmpty();
     }
 
     @Test
@@ -67,7 +90,7 @@ class PatchRequestTest {
         body.put("platformId", null);
         body.put("isDigital", 0);
         PatchRequest.validateVideogame(body, validator);
-        VideogameRequest current = new VideogameRequest("Game", null, null, 2, null, null, 1, 0, 0, false, null);
+        VideogameRequest current = new VideogameRequest("Game", null, null, 2, null, null, 1, 0, 0, false, null, null);
         VideogameRequest merged = PatchRequest.merge(body, current);
         assertThat(merged.videogameName()).isEqualTo("Game");
         assertThat(merged.platformId()).isNull();
@@ -123,8 +146,8 @@ class PatchRequestTest {
     void requestDtosValidateNamesAndVideogameBoundaries() {
         assertThat(validator.validate(new PlatformRequest(" ", null, null))).isNotEmpty();
         assertThat(validator.validate(new DigitalPlatformRequest(null, null))).isNotEmpty();
-        assertThat(validator.validate(new VideogameRequest("Game", null, null, 1, 1, null, 0, 1, 0, false, null))).isEmpty();
-        var violations = validator.validate(new VideogameRequest(" ", null, null, 0, -1, null, -1, 2, 2, false, null));
+        assertThat(validator.validate(new VideogameRequest("Game", null, null, 1, 1, null, 0, 1, 0, false, null, null))).isEmpty();
+        var violations = validator.validate(new VideogameRequest(" ", null, null, 0, -1, null, -1, 2, 2, false, null, null));
         assertThat(violations).extracting(v -> v.getPropertyPath().toString())
                 .containsExactlyInAnyOrder("videogameName", "platformId", "digitalPlatformId", "isDigital", "isCompleted", "isPlatinum");
     }

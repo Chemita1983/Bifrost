@@ -29,7 +29,7 @@ public class WebMapper {
                 : new DigitalPlatform(request.digitalPlatformId(), null, null);
         return new Videogame(null, request.videogameName(), request.videogameType(), request.videogameYear(),
                 platform, digitalPlatform, request.companyName(), request.isDigital(), request.isCompleted(),
-                request.isPlatinum(), request.multiplayer(), request.hoursPlayed(), null);
+                request.isPlatinum(), request.multiplayer(), request.hoursPlayed(), null, request.coverUrl());
     }
 
     /** Used by PATCH to merge the received fields into the current values. */
@@ -46,7 +46,7 @@ public class WebMapper {
                 game.getPlatform() == null ? null : game.getPlatform().getId(),
                 game.getDigitalPlatform() == null ? null : game.getDigitalPlatform().getId(),
                 game.getCompanyName(), game.getDigital(), game.getCompleted(), game.getPlatinum(),
-                game.isMultiplayer(), game.getHoursPlayed());
+                game.isMultiplayer(), game.getHoursPlayed(), game.getCoverUrl());
     }
 
     public PlatformResponse toResponse(Platform platform) {
@@ -62,6 +62,7 @@ public class WebMapper {
                 game.getPlatform() == null ? null : toResponse(game.getPlatform()),
                 game.getDigitalPlatform() == null ? null : toResponse(game.getDigitalPlatform()),
                 game.getCompanyName(), game.getDigital() == 1, game.getCompleted() == 1,
-                game.getPlatinum() == 1, game.isMultiplayer(), game.getHoursPlayed(), game.getSteamAppId());
+                game.getPlatinum() == 1, game.isMultiplayer(), game.getHoursPlayed(), game.getSteamAppId(),
+                game.getCoverUrl());
     }
 }

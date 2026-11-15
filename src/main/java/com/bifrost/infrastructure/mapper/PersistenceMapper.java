@@ -34,7 +34,7 @@ public class PersistenceMapper {
                 entity.getVideogameYear(), toDomain(entity.getPlatformEntity()),
                 toDomain(entity.getDigitalPlatformEntity()), entity.getCompanyName(), entity.getIsDigital(),
                 entity.getIsCompleted(), entity.getIsPlatinum(), entity.isMultiplayer(), entity.getHoursPlayed(),
-                entity.getSteamAppId());
+                entity.getSteamAppId(), entity.getCoverUrl());
     }
 
     /*
@@ -64,6 +64,7 @@ public class PersistenceMapper {
         target.setIsPlatinum(source.getPlatinum());
         target.setMultiplayer(source.isMultiplayer());
         target.setHoursPlayed(source.getHoursPlayed());
+        target.setCoverUrl(source.getCoverUrl());
         target.setPlatformEntity(platform);
         target.setDigitalPlatformEntity(digitalPlatform);
     }

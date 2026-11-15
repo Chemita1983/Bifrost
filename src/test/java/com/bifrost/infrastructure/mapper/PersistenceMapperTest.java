@@ -76,6 +76,21 @@ class PersistenceMapperTest {
     }
 
     @Test
+    void mapsCoverUrlBetweenEntityAndDomain() {
+        var entity = new VideogameEntity();
+        entity.setCoverUrl("https://example.com/cover.jpg");
+        Videogame domain = mapper.toDomain(entity);
+        assertThat(domain.getCoverUrl()).isEqualTo("https://example.com/cover.jpg");
+
+        var target = new VideogameEntity();
+        mapper.updateEntity(domain, target, null, null);
+        assertThat(target.getCoverUrl()).isEqualTo("https://example.com/cover.jpg");
+        domain.setCoverUrl(null);
+        mapper.updateEntity(domain, target, null, null);
+        assertThat(target.getCoverUrl()).isNull();
+    }
+
+    @Test
     void mapsSteamAppIdToDomainButUpdateEntityDoesNotCopyIt() {
         var entity = new VideogameEntity();
         entity.setSteamAppId(620);

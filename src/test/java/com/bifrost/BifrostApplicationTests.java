@@ -159,6 +159,32 @@ class BifrostApplicationTests {
                 .andExpect(jsonPath("$[0].hoursPlayed").value(5));
     }
     @Test
+    void coverUrlCanBeSetChangedClearedAndInvalidValuesAreRejected() throws Exception {
+        int platform = create("/platform", "{\"platformName\":\"Console\"}");
+        int id = create("/videogame", "{\"videogameName\":\"Covered\",\"platformId\":" + platform
+                + ",\"coverUrl\":\"https://example.com/a.jpg\"}");
+        mvc.perform(get("/videogame").param("name", "Covered"))
+                .andExpect(jsonPath("$[0].coverUrl").value("https://example.com/a.jpg"));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isCompleted\":1}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.coverUrl").value("https://example.com/a.jpg"));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"coverUrl\":\"http://example.com/b.png\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.coverUrl").value("http://example.com/b.png"));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"coverUrl\":\"javascript:alert(1)\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/videogame").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"videogameName\":\"Bad\",\"platformId\":" + platform + ",\"coverUrl\":\"not a url\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/videogame").param("name", "Covered"))
+                .andExpect(jsonPath("$[0].coverUrl").value("http://example.com/b.png"));
+        mvc.perform(patch("/videogame/{id}", id).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"coverUrl\":null}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.coverUrl").doesNotExist());
+    }
+
+    @Test
     void requiredRelationsAreValidatedWithoutPersistingInvalidRequests() throws Exception {
         int platform = create("/platform", "{\"platformName\":\"Console\"}");
         int store = create("/digital-platform", "{\"digitalPlatformName\":\"Store\"}");
@@ -235,11 +261,12 @@ class BifrostApplicationTests {
                         .content("""
                                 {"videogameName":"Portal 2 (mine)", "isCompleted":1, "isPlatinum":1,
                                  "videogameType":"Puzzle", "videogameYear":"2011", "companyName":"Valve",
-                                 "multiplayer":true, "platformId":9002}
+                                 "multiplayer":true, "platformId":9002, "coverUrl":"https://example.com/portal2.jpg"}
                                 """))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.steamAppId").value(620));
         String manualRow = "SELECT videogame_name, company_name, is_completed, is_digital, is_platinum, "
-                + "videogame_type, videogame_year, digital_platform_id, platform_id, multiplayer, steam_app_id "
+                + "videogame_type, videogame_year, digital_platform_id, platform_id, multiplayer, steam_app_id, "
+                + "cover_url "
                 + "FROM videogames WHERE id = ?";
         java.util.Map<String, Object> manualData = jdbc.queryForMap(manualRow, portal2);
         mvc.perform(patch("/videogame/{id}", portal2).contentType(MediaType.APPLICATION_JSON)

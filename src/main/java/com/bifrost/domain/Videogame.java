@@ -26,4 +26,6 @@ public class Videogame {
     private Integer hoursPlayed;
     /** Steam application ID; only set for games imported from Steam and never changed afterwards. */
     private Integer steamAppId;
+    /** Optional image URL for the game; {@code null} means no cover. */
+    private String coverUrl;
 }
