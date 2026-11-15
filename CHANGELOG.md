@@ -18,6 +18,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- Optional `coverUrl` for video games (new nullable `cover_url` column, up to 2048 characters): an `http` or
+  `https` image URL, validated on create and PATCH (`null` removes it) and never changed by the Steam sync.
 - Docker support: multi-stage `Dockerfile`, an `app` service in `docker-compose.yml` that waits for a healthy
   MariaDB, `.dockerignore` and a `bifrost.env.example` template. `.env` and `bifrost.env` are git-ignored.
 - `POST /steam/sync` imports the Steam library: new games are created as digital PC games from Steam and

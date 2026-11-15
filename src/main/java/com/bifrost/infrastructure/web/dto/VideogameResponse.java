@@ -16,5 +16,6 @@ public record VideogameResponse(
         boolean isPlatinum,
         boolean multiplayer,
         Integer hoursPlayed,
-        Integer steamAppId) {
+        Integer steamAppId,
+        String coverUrl) {
 }
