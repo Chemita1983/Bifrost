@@ -243,8 +243,13 @@ JPA. Integration tests use MockMvc, Spring Data JPA and a disposable MariaDB
 
 ### Run with Docker
 
-Docker Compose starts MariaDB and the Bifröst application together. The
-application image is built from the `Dockerfile` (Maven build, Java 17 runtime).
+Docker Compose starts MariaDB, the Bifröst application and the web frontend
+together. The application image is built from the `Dockerfile` (Maven build,
+Java 17 runtime). The frontend is a separate project,
+[bifrost-web](https://github.com/Chemita1983/bifrost-web), whose own
+`Dockerfile` builds the static files and serves them with nginx; Compose builds
+it from the folder set in `WEB_PATH`, so that repository must be cloned on the
+same machine.
 
 1. Create your configuration file from the template. `bifrost.env` and `.env`
    are ignored by git, so real values are never committed:
@@ -261,6 +266,8 @@ application image is built from the `Dockerfile` (Maven build, Java 17 runtime).
    | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | Database passwords. **Required.** |
    | `DB_PORT` | Host port for MariaDB (default `3306`). |
    | `APP_PORT` | Host port for the API (default `8080`). |
+   | `WEB_PATH` | Folder of the `bifrost-web` project (default `../../Front/BifrostWeb`, relative to this repository). |
+   | `WEB_PORT` | Host port for the web frontend (default `3000`). |
    | `STEAM_API_KEY`, `STEAM_ID` | Needed only for `POST /steam/sync`. |
    | `STEAM_PLATFORM_ID`, `STEAM_DIGITAL_PLATFORM_ID` | Optional, see [Steam synchronization](#steam-synchronization). |
 
@@ -274,10 +281,14 @@ application image is built from the `Dockerfile` (Maven build, Java 17 runtime).
    values in `bifrost.env`, always pass `--env-file bifrost.env`; otherwise
    `DB_PASSWORD` is blank and the application cannot connect.
 
-The API is then available at `http://localhost:8080`. Useful commands:
+The API is then available at `http://localhost:8080` and the web frontend at
+`http://localhost:3000`. The frontend's nginx forwards `/api/...` to the
+application through the internal network, removing the `/api` prefix, so the
+API's missing CORS configuration is not a problem. Useful commands:
 
 ```bash
 docker logs -f bifrost-app                        # application logs
+docker logs -f bifrost-web                        # web frontend logs
 docker compose --env-file bifrost.env down        # stop (data is kept)
 ```
 
@@ -286,6 +297,10 @@ internal network. Data lives in the `bifrost_videogames_data` volume, which
 survives `down` and rebuilds. Do not run the application from your IDE on the
 same port at the same time. Back up the database before the first start, since
 `ddl-auto: update` may change the schema.
+
+When the frontend code changes, rebuild only its image with
+`docker compose --env-file bifrost.env up -d --build web`. While developing it,
+`npm run dev` in `bifrost-web` (port 5173) is more convenient.
 
 ### Start only MariaDB
 
