@@ -115,6 +115,35 @@ class SteamSyncServiceTest {
         verify(steamLibrary, never()).findSoftware(any());
     }
 
+    @Test
+    void newGamesGetTheStoreCoverOrNoneWhenItIsMissing() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "With cover", 0), new OwnedGame(20, "No cover", 0)));
+        when(repository.findSteamGames()).thenReturn(List.of());
+        when(steamLibrary.findCoverUrl(10)).thenReturn(java.util.Optional.of("https://cdn.test/10/header.jpg"));
+        when(steamLibrary.findCoverUrl(20)).thenReturn(java.util.Optional.empty());
+
+        assertThat(service.sync(false)).isEqualTo(new Result(2, 0, 0, 0, false));
+
+        ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
+        verify(repository, org.mockito.Mockito.times(2)).save(created.capture());
+        assertThat(created.getAllValues()).extracting(Videogame::getCoverUrl)
+                .containsExactly("https://cdn.test/10/header.jpg", null);
+    }
+
+    @Test
+    void dryRunAndExistingGamesNeverAskForCovers() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 0), new OwnedGame(20, "Existing", 600)));
+        when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, 5)));
+
+        service.sync(true);
+        verify(steamLibrary, never()).findCoverUrl(anyInt());
+
+        service.sync(false);
+        verify(steamLibrary).findCoverUrl(10);
+        verify(steamLibrary, never()).findCoverUrl(20);
+        verify(repository).updateHoursPlayed(2, 10);
+    }
+
     private static Videogame steamGame(int id, int appId, Integer hours) {
         Videogame game = new Videogame();
         game.setId(id);

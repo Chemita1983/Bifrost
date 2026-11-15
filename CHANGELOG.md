@@ -18,6 +18,9 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- `POST /steam/sync` now sets `coverUrl` on newly created games from the `header_image` of the Steam store
+  (`appdetails`). Failures only log a warning and the game is created without cover; existing games and dry runs
+  are unaffected. Steam calls have 5 s connect and 10 s read timeouts.
 - `web` service in `docker-compose.yml` that builds and serves the `bifrost-web` frontend with nginx
   (`WEB_PATH` and `WEB_PORT` variables), so one `docker compose up` starts the database, the API and the web.
 - Optional `coverUrl` for video games (new nullable `cover_url` column, up to 2048 characters): an `http` or

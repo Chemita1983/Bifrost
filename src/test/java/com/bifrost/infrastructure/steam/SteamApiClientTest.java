@@ -30,7 +30,7 @@ class SteamApiClientTest {
     private static final String KEY = "secret-key";
     private final RestClient.Builder builder = RestClient.builder();
     private final MockRestServiceServer steam = MockRestServiceServer.bindTo(builder).build();
-    private final SteamApiClient client = new SteamApiClient(builder, "https://steam.test", KEY, "7656");
+    private final SteamApiClient client = new SteamApiClient(builder, "https://steam.test", "https://store.test", KEY, "7656");
 
     @Test
     void readsOwnedGamesFromSteam() {
@@ -55,7 +55,7 @@ class SteamApiClientTest {
 
     @Test
     void missingConfigurationFailsWithoutCallingSteam() {
-        var unconfigured = new SteamApiClient(builder, "https://steam.test", "", "");
+        var unconfigured = new SteamApiClient(builder, "https://steam.test", "https://store.test", "", "");
 
         assertThatThrownBy(unconfigured::getOwnedGames)
                 .isInstanceOf(IllegalStateException.class)
@@ -154,5 +154,43 @@ class SteamApiClientTest {
                 .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
         assertThatThrownBy(() -> client.findSoftware(List.of(620)))
                 .hasMessageStartingWith("Steam returned HTTP 503 when reading the store information");
+    }
+
+    private static final String COVER = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2062430/a157/header.jpg?t=1";
+
+    private void storeAnswers(int appId, String body) {
+        steam.expect(requestTo("https://store.test/api/appdetails?appids=" + appId + "&filters=basic"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void coverIsTheHeaderImageReturnedByTheStoreAsIs() {
+        storeAnswers(2062430, "{\"2062430\":{\"success\":true,\"data\":{\"name\":\"BALL x PIT\",\"header_image\":\"" + COVER + "\"}}}");
+
+        assertThat(client.findCoverUrl(2062430)).contains(COVER);
+        steam.verify();
+    }
+
+    @Test
+    void noCoverWhenTheStoreHasNoSuccessNoImageOrAnInvalidUrl() {
+        storeAnswers(1, "{\"1\":{\"success\":false}}");
+        storeAnswers(2, "{\"2\":{\"success\":true,\"data\":{\"name\":\"No image\"}}}");
+        storeAnswers(3, "{\"3\":{\"success\":true,\"data\":{\"header_image\":\"ftp://x/header.jpg\"}}}");
+        storeAnswers(4, "{\"4\":{\"success\":true,\"data\":{\"header_image\":\"https://x/" + "a".repeat(2048) + "\"}}}");
+        storeAnswers(5, "[]");
+
+        assertThat(IntStream.rangeClosed(1, 5).mapToObj(client::findCoverUrl)).allMatch(java.util.Optional::isEmpty);
+    }
+
+    @Test
+    void storeFailuresNeverThrowAndReturnNoCover() {
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://store.test/")))
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
+        steam.expect(requestTo(org.hamcrest.Matchers.startsWith("https://store.test/")))
+                .andRespond(withException(new IOException("timeout")));
+
+        assertThat(client.findCoverUrl(7)).isEmpty();
+        assertThat(client.findCoverUrl(8)).isEmpty();
     }
 }
