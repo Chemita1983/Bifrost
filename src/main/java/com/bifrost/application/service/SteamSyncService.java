@@ -7,6 +7,8 @@ import com.bifrost.application.port.out.VideogameRepositoryPort;
 import com.bifrost.domain.DigitalPlatform;
 import com.bifrost.domain.Platform;
 import com.bifrost.domain.Videogame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +22,13 @@ import java.util.stream.Collectors;
 
 /**
  * Imports the Steam library: games are matched by their Steam application ID.
- * New games are created (software is skipped); existing games only get their hours
- * updated. Nothing is ever deleted.
+ * New games are created with the cover of the Steam store (software is skipped); existing games only get
+ * their hours updated. Nothing is ever deleted.
  */
 @Service
 public class SteamSyncService implements SteamSyncUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(SteamSyncService.class);
 
     private final SteamLibraryPort steamLibrary;
     private final VideogameRepositoryPort videogameRepository;
@@ -65,7 +69,8 @@ public class SteamSyncService implements SteamSyncUseCase {
 
         // 2. Apply the changes, unless it is only a preview.
         if (!dryRun) {
-            newGames.forEach(game -> videogameRepository.save(newVideogame(game)));
+            // The covers are fetched one by one (the store limits requests); only new games reach this point.
+            newGames.forEach(game -> videogameRepository.save(newVideogame(game, findCoverUrl(game.appId()))));
             // Only the hours column is written: name, year, company and other manual data are never touched.
             gamesWithNewHours.forEach(game ->
                     videogameRepository.updateHoursPlayed(collection.get(game.appId()).getId(), hoursPlayed(game)));
@@ -78,7 +83,17 @@ public class SteamSyncService implements SteamSyncUseCase {
         return game.minutesPlayed() / 60;
     }
 
-    private Videogame newVideogame(OwnedGame game) {
+    private String findCoverUrl(int appId) {
+        try {
+            return steamLibrary.findCoverUrl(appId).orElse(null);
+        } catch (RuntimeException ex) {
+            // A cover is optional and must never prevent importing a game or updating playtime.
+            log.warn("Could not retrieve the Steam cover for app {}: {}", appId, ex.getClass().getSimpleName());
+            return null;
+        }
+    }
+
+    private Videogame newVideogame(OwnedGame game, String coverUrl) {
         Videogame videogame = new Videogame();
         videogame.setName(game.name());
         videogame.setPlatform(new Platform(platformId, null, null, null));
@@ -86,6 +101,7 @@ public class SteamSyncService implements SteamSyncUseCase {
         videogame.setDigital(1);
         videogame.setHoursPlayed(hoursPlayed(game));
         videogame.setSteamAppId(game.appId());
+        videogame.setCoverUrl(coverUrl);
         return videogame;
     }
 }

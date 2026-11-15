@@ -188,7 +188,12 @@ cannot be deleted and returns 409; existing games are preserved.
 `POST /steam/sync` imports the Steam library of the configured account:
 
 - Steam games that are not in the collection are created as digital PC games
-  from the Steam store, with their name and hours played.
+  from the Steam store, with their name, hours played and cover.
+- The cover (`coverUrl`) is the `header_image` that the store returns in
+  `https://store.steampowered.com/api/appdetails`, saved as Steam returns it.
+  It is requested one game at a time, only for new games and never in a dry
+  run. If the store fails, times out or has no image, the game is still created
+  without cover and a warning is logged. An existing `coverUrl` is never changed.
 - Apps that the Steam store identifies as software, such as Wallpaper Engine,
   are skipped. Games, DLC, other store types and apps unknown to the store, for
   example games no longer sold, are imported. Only new apps are checked, through

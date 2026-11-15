@@ -6,6 +6,11 @@ spring:
     username: ${DB_USER:bifrost}
     password: ${DB_PASSWORD:bifrost}
     driver-class-name: org.mariadb.jdbc.Driver
+  http:
+    client:
+      # Steam calls must not block the synchronization for long.
+      connect-timeout: 5s
+      read-timeout: 10s
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,6 +22,7 @@ bifrost:
     api-key: ${STEAM_API_KEY:}
     steam-id: ${STEAM_ID:}
     base-url: ${STEAM_API_URL:https://api.steampowered.com}
+    store-url: ${STEAM_STORE_URL:https://store.steampowered.com}
     # Existing platform (PC) and digital store (Steam) assigned to imported games.
     platform-id: ${STEAM_PLATFORM_ID:6}
     digital-platform-id: ${STEAM_DIGITAL_PLATFORM_ID:1}

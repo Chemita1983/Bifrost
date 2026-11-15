@@ -2,7 +2,10 @@ package com.bifrost.infrastructure.steam;
 
 import com.bifrost.application.port.out.SteamLibraryPort;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -13,6 +16,8 @@ import org.springframework.web.util.UriBuilder;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,16 +32,21 @@ public class SteamApiClient implements SteamLibraryPort {
     /** Store type of software, such as Wallpaper Engine. Games (0), DLC (4) and other types are imported. */
     private static final int SOFTWARE_TYPE = 6;
     private static final int STORE_BATCH_SIZE = 100;
+    private static final int MAX_COVER_URL_LENGTH = 2048;
+    private static final Logger log = LoggerFactory.getLogger(SteamApiClient.class);
 
     private final RestClient restClient;
+    private final String storeUrl;
     private final String apiKey;
     private final String steamId;
 
     public SteamApiClient(RestClient.Builder restClientBuilder,
                           @Value("${bifrost.steam.base-url}") String baseUrl,
+                          @Value("${bifrost.steam.store-url}") String storeUrl,
                           @Value("${bifrost.steam.api-key}") String apiKey,
                           @Value("${bifrost.steam.steam-id}") String steamId) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
+        this.storeUrl = storeUrl;
         this.apiKey = apiKey;
         this.steamId = steamId;
     }
@@ -84,6 +94,32 @@ public class SteamApiClient implements SteamLibraryPort {
         return software;
     }
 
+    /** Reads header_image from the store (appdetails). Any failure is only logged: the game is created without cover. */
+    @Override
+    public Optional<String> findCoverUrl(int appId) {
+        try {
+            Map<String, AppDetails> body = restClient.get()
+                    .uri(storeUrl + "/api/appdetails?appids={appId}&filters=basic", appId)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            AppDetails details = body == null ? null : body.get(String.valueOf(appId));
+            if (details == null || !details.success() || details.data() == null) {
+                log.warn("Steam store details were unavailable for app {}", appId);
+                return Optional.empty();
+            }
+            String url = details.data().headerImage();
+            if (url == null || url.length() > MAX_COVER_URL_LENGTH || !url.matches("https?://\\S+")) {
+                log.warn("Steam store details did not contain a valid header image for app {}", appId);
+                return Optional.empty();
+            }
+            return Optional.of(url);
+        } catch (RuntimeException ex) {
+            log.warn("Could not get the cover of Steam app {}: {}", appId, ex.getClass().getSimpleName());
+            return Optional.empty();
+        }
+    }
+
     private <T> T call(String action, Function<UriBuilder, URI> uri, Class<T> responseType) {
         try {
             return restClient.get().uri(uri).retrieve().body(responseType);
@@ -129,6 +165,12 @@ public class SteamApiClient implements SteamLibraryPort {
         }
 
         record StoreItem(@JsonProperty("appid") int appId, Integer type) {
+        }
+    }
+
+    record AppDetails(boolean success, Data data) {
+
+        record Data(@JsonProperty("header_image") String headerImage) {
         }
     }
 }
