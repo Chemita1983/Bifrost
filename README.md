@@ -168,8 +168,8 @@ A video game may have an optional `coverUrl`: an `http` or `https` image URL of
 up to 2048 characters, without spaces. Any other value (for example `ftp:` or
 `javascript:` URLs, or an empty string) is rejected with 400. Like `hoursPlayed`,
 omitting it on PATCH preserves the current value and an explicit `null` removes
-it; responses omit it when there is no cover. The Steam synchronization never
-changes it.
+it; responses omit it when there is no cover. Steam synchronization sets it
+only while creating a new game and never overwrites it later.
 
 The schema is managed by Hibernate: the current `ddl-auto: update` setting
 creates and updates tables and columns at application startup, so back up the

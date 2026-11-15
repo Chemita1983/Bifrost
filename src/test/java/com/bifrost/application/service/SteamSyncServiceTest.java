@@ -132,8 +132,10 @@ class SteamSyncServiceTest {
 
     @Test
     void dryRunAndExistingGamesNeverAskForCovers() {
+        Videogame existing = steamGame(2, 20, 5);
+        existing.setCoverUrl("https://cdn.test/manual-cover.jpg");
         when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 0), new OwnedGame(20, "Existing", 600)));
-        when(repository.findSteamGames()).thenReturn(List.of(steamGame(2, 20, 5)));
+        when(repository.findSteamGames()).thenReturn(List.of(existing));
 
         service.sync(true);
         verify(steamLibrary, never()).findCoverUrl(anyInt());
@@ -142,6 +144,21 @@ class SteamSyncServiceTest {
         verify(steamLibrary).findCoverUrl(10);
         verify(steamLibrary, never()).findCoverUrl(20);
         verify(repository).updateHoursPlayed(2, 10);
+        verify(repository, never()).update(anyInt(), any());
+        assertThat(existing.getCoverUrl()).isEqualTo("https://cdn.test/manual-cover.jpg");
+    }
+
+    @Test
+    void unexpectedCoverClientErrorsDoNotPreventCreatingTheGame() {
+        when(steamLibrary.getOwnedGames()).thenReturn(List.of(new OwnedGame(10, "New", 0)));
+        when(repository.findSteamGames()).thenReturn(List.of());
+        when(steamLibrary.findCoverUrl(10)).thenThrow(new IllegalStateException("timeout"));
+
+        assertThat(service.sync(false)).isEqualTo(new Result(1, 0, 0, 0, false));
+
+        ArgumentCaptor<Videogame> created = ArgumentCaptor.forClass(Videogame.class);
+        verify(repository).save(created.capture());
+        assertThat(created.getValue().getCoverUrl()).isNull();
     }
 
     private static Videogame steamGame(int id, int appId, Integer hours) {
