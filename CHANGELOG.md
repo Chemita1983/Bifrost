@@ -18,6 +18,8 @@ All notable changes to Bifröst will be documented in this file.
 
 ### Added
 
+- `web` service in `docker-compose.yml` that builds and serves the `bifrost-web` frontend with nginx
+  (`WEB_PATH` and `WEB_PORT` variables), so one `docker compose up` starts the database, the API and the web.
 - Optional `coverUrl` for video games (new nullable `cover_url` column, up to 2048 characters): an `http` or
   `https` image URL, validated on create and PATCH (`null` removes it) and never changed by the Steam sync.
 - Docker support: multi-stage `Dockerfile`, an `app` service in `docker-compose.yml` that waits for a healthy

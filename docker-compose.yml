@@ -38,5 +38,15 @@ services:
     ports:
       - "${APP_PORT:-8080}:8080"
 
+  web:
+    # The frontend lives in its own repository (bifrost-web); WEB_PATH points to its folder.
+    build: ${WEB_PATH:-../../Front/BifrostWeb}
+    container_name: bifrost-web
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${WEB_PORT:-3000}:8080"
+
 volumes:
   bifrost_videogames_data:
